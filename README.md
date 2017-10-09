@@ -1,2 +1,8 @@
-# projetISG
-Projet ISG 2017 UPMC
+# Projet ISG
+2017 UPMC
+
+Tanguy SOTO
+
+Nicolas BILLOD
+
+Guillaume LORTHIOIR
