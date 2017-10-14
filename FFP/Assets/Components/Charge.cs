@@ -11,6 +11,6 @@
 
 public class Charge : MonoBehaviour {
 	
-	public float charge = 0; // In Coulomb (C)
+	public float charge = 0;
 
 }

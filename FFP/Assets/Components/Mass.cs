@@ -11,6 +11,6 @@
 
 public class Mass : MonoBehaviour {
 	
-	public float mass = 1; // In kilogram (kg)
+	public float mass = 1;
 
 }

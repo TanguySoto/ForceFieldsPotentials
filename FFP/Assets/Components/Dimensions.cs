@@ -11,8 +11,8 @@
 
 public class Dimensions : MonoBehaviour {
 
-	public float length 	= 1; 	// In meters (m), on axe x
-	public float width 		= 1; 	// In meters (m), on axe z
-	public float height 	= 1; 	// In meters (m), on axe y
+	public float width 		= 1f; 	// on axe x
+	public float length 	= 1f; 	// on axe z
+	public float height 	= 1f; 	// on axe y
 
 }
