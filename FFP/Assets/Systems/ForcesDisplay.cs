@@ -60,8 +60,10 @@ public class ForcesDisplay : FSystem {
 		foreach(GameObject s in sourcesFamily){
 			// Get associated field and position
 			Field f = s.GetComponent<Field>();
-			Position p = s.GetComponent<Position> ();
+			Position position = s.GetComponent<Position> ();
+			Vector3 p = position.pos;
 
+			// Apply field to Terrain heights
 			for (int x = 0; x < hmWidth; x++) {
 				for (int y = 0; y < hmHeight; y++) {
 					level [y,x] += gaussian(p.x*hmWidth,p.y*hmHeight,f.sigx*hmWidth,f.sigy*hmHeight,f.A/2f,x,y);
@@ -83,7 +85,8 @@ public class ForcesDisplay : FSystem {
 			// Get associated dims and position
 			Dimensions dims = s.GetComponent<Dimensions>();
 			Field field = s.GetComponent<Field> ();
-			Position p = s.GetComponent<Position> ();
+			Position position = s.GetComponent<Position> ();
+			Vector3 p = position.pos;
 			Transform tr = s.GetComponent<Transform> ();
 
 			// Move it to right position
@@ -91,8 +94,10 @@ public class ForcesDisplay : FSystem {
 			tr.position = newPos;
 
 			// Scale it to the right dimension
-			dims.width = field.sigx*20;
-			dims.length = field.sigy*20;
+			int scale = 10;
+			dims.width = field.sigx * scale;
+			dims.length = field.sigy * scale;
+			dims.height = Mathf.Min (dims.width, dims.length);
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
 		}
 	}

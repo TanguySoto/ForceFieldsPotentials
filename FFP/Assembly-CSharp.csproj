@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\CameraTest.cs" />
      <Compile Include="Assets\Components\Charge.cs" />
      <Compile Include="Assets\Components\Dimensions.cs" />
      <Compile Include="Assets\Components\Editable.cs" />
@@ -52,11 +53,13 @@
      <Compile Include="Assets\Components\Mass.cs" />
      <Compile Include="Assets\Components\Movement.cs" />
      <Compile Include="Assets\Components\Position.cs" />
+     <Compile Include="Assets\Systems\Collisions.cs" />
      <Compile Include="Assets\Systems\Constants.cs" />
      <Compile Include="Assets\Systems\ForcesComputation.cs" />
      <Compile Include="Assets\Systems\ForcesDisplay.cs" />
      <Compile Include="Assets\Systems\GameLogic.cs" />
      <Compile Include="Assets\Systems\PlayerActions.cs" />
+     <Compile Include="Assets\Systems\UI.cs" />
      <None Include="Assets\Libraries\FYFY_Inspector.xml" />
      <None Include="Assets\Libraries\FYFY.xml" />
      <None Include="Assets\Libraries\Monitoring_Inspector.xml" />

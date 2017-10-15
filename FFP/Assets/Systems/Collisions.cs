@@ -8,12 +8,9 @@ using FYFY;
  * Nicolas BILLOD
  * Guillaume LORTHIOIR
  * Tanguy SOTO
- * 
- * Camera from : http://wiki.unity3d.com/index.php?title=MouseOrbitZoom
  */
 
-public class PlayerActions : FSystem {
-	
+public class Collisions : FSystem {
 	protected override void onPause(int currentFrame) {
 	}
 
@@ -21,5 +18,5 @@ public class PlayerActions : FSystem {
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
-	} 
+	}
 }

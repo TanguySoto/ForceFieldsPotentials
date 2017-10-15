@@ -24,7 +24,6 @@ public class ForcesComputation : FSystem {
 	}
 		
 	protected override void onResume(int currentFrame){
-		
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
@@ -44,7 +43,7 @@ public class ForcesComputation : FSystem {
 
 		// Get the ship and its position, speed, acc and mass
 		GameObject ship = shipFamily.First ();
-		Position pos = ship.GetComponent<Position> ();
+		Position shipPosition = ship.GetComponent<Position> ();
 		Movement m = ship.GetComponent<Movement> ();
 		Mass mass = ship.GetComponent<Mass> ();
 		Transform tr = ship.GetComponent<Transform> ();
@@ -54,21 +53,27 @@ public class ForcesComputation : FSystem {
 		foreach(GameObject s in sourcesFamily){
 			// Get associated field and position for each source
 			Field f = s.GetComponent<Field> ();
-			Position p = s.GetComponent<Position> ();
-			forces.x += gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, pos.x * hmWidth, pos.y * hmHeight);
-			forces.y += gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, pos.x * hmWidth, pos.y * hmHeight);
+			Position position = s.GetComponent<Position> ();
+			Vector3 p = position.pos;
+			forces.x += gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight);
+			forces.y += gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight);
 		}
 
-		// Apply force to the ship
+		// Apply force to the ship using Euler method
+		/*
 		m.acceleration += (forces/mass.mass);
-		m.speed += m.acceleration;
-		pos.x += m.speed.x;
-		pos.y += m.speed.y;
-		pos.z += m.speed.z;
+		m.speed += m.acceleration*Time.deltaTime;
+		shipPosition.pos += m.speed*Time.deltaTime;
 
-		Debug.Log (forces.x);
+		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
+		*/
 
-		tr.position = new Vector3 (pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, pos.y * terrDims.z);
+		// Apply force using unity and thus allowing collisons
+		Rigidbody r = ship.GetComponent<Rigidbody> ();
+		r.AddForce (new Vector3(forces.x,forces.z,forces.y)*Time.deltaTime*10000);
+		shipPosition.pos = new Vector3 (r.transform.position.x/terrDims.x, r.transform.position.z/terrDims.z, r.transform.position.y);
+		m.speed = r.velocity;
+		m.acceleration = forces;
 	}
 
 	protected float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){
