@@ -12,6 +12,8 @@ using FYFY;
 
 public class ForcesComputation : FSystem {
 
+	// ==== VARIABLES ====
+
 	private Family pPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
 	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
@@ -45,8 +47,6 @@ public class ForcesComputation : FSystem {
 		GameObject ship = shipFamily.First ();
 		Position shipPosition = ship.GetComponent<Position> ();
 		Movement m = ship.GetComponent<Movement> ();
-		Mass mass = ship.GetComponent<Mass> ();
-		Transform tr = ship.GetComponent<Transform> ();
 
 		// Compute forces to be applied
 		Vector3 forces = Vector3.zero;
@@ -55,32 +55,24 @@ public class ForcesComputation : FSystem {
 			Field f = s.GetComponent<Field> ();
 			Position position = s.GetComponent<Position> ();
 			Vector3 p = position.pos;
-			forces.x += gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight);
-			forces.y += gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight);
+			forces.x += Mathf.Round(1000f * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight)*Time.deltaTime)/1000f;
+			forces.y += Mathf.Round(1000f * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight)*Time.deltaTime)/1000f;
 		}
-
-		// Apply force to the ship using Euler method
-		/*
-		m.acceleration += (forces/mass.mass);
-		m.speed += m.acceleration*Time.deltaTime;
-		shipPosition.pos += m.speed*Time.deltaTime;
-
-		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
-		*/
 
 		// Apply force using unity and thus allowing collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
-		r.AddForce (new Vector3(forces.x,forces.z,forces.y)*Time.deltaTime*10000);
+		r.AddForce (new Vector3(forces.x,forces.z,forces.y));
 		shipPosition.pos = new Vector3 (r.transform.position.x/terrDims.x, r.transform.position.z/terrDims.z, r.transform.position.y);
+		r.velocity = new Vector3 (Mathf.Round (1000f * r.velocity.x) / 1000f, Mathf.Round (1000f * r.velocity.y) / 1000f, Mathf.Round (1000f * r.velocity.z) / 1000f);
 		m.speed = r.velocity;
 		m.acceleration = forces;
 	}
 
 	protected float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){
-		return A * ((x-x0)/(sigx*sigx)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
+		return Constants.FORCES_SCALING * A * ((x-x0)/(sigx*sigx)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
 	}
 
 	protected float gaussianDerivativeY(float x0, float y0, float sigx, float sigy, float A, float x, float y){
-		return A * ((y-y0)/(sigy*sigy)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
+		return Constants.FORCES_SCALING *A * ((y-y0)/(sigy*sigy)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
 	}
 }

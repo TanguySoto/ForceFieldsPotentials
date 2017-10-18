@@ -12,6 +12,8 @@ using FYFY;
 
 public class ForcesDisplay : FSystem {
 
+	// ==== VARIABLES ====
+
 	private Family pPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
 	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
