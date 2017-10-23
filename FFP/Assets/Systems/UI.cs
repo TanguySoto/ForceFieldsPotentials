@@ -11,6 +11,9 @@ using FYFY;
  */
 
 public class UI : FSystem {
+
+
+
 	protected override void onPause(int currentFrame) {
 	}
 

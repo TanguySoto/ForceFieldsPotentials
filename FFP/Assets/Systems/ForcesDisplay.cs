@@ -96,7 +96,7 @@ public class ForcesDisplay : FSystem {
 			tr.position = newPos;
 
 			// Scale it to the right dimension
-			int scale = 10;
+			float scale = Constants.SOURCES_SIZE_SCALING;
 			dims.width = field.sigx * scale;
 			dims.length = field.sigy * scale;
 			dims.height = Mathf.Min (dims.width, dims.length);

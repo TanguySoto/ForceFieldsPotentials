@@ -47,6 +47,7 @@ public class ForcesComputation : FSystem {
 		GameObject ship = shipFamily.First ();
 		Position shipPosition = ship.GetComponent<Position> ();
 		Movement m = ship.GetComponent<Movement> ();
+		Mass mass = ship.GetComponent<Mass> ();
 
 		// Compute forces to be applied
 		Vector3 forces = Vector3.zero;
@@ -55,17 +56,28 @@ public class ForcesComputation : FSystem {
 			Field f = s.GetComponent<Field> ();
 			Position position = s.GetComponent<Position> ();
 			Vector3 p = position.pos;
-			forces.x += Mathf.Round(1000f * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight)*Time.deltaTime)/1000f;
-			forces.y += Mathf.Round(1000f * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight)*Time.deltaTime)/1000f;
+			forces.x += Mathf.Round(1000f * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/1000f;
+			forces.y += Mathf.Round(1000f * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/1000f;
 		}
 
-		// Apply force using unity and thus allowing collisons
+
+
+		// Apply force to the ship
+		m.acceleration = (forces/mass.mass);
+		m.speed += m.acceleration * Time.deltaTime;
+		shipPosition.pos += m.speed * Time.deltaTime; 
+
+		Transform tr = ship.GetComponent<Transform>();
+		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
+
+
+		/* Apply force using unity and thus allowing collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
 		r.AddForce (new Vector3(forces.x,forces.z,forces.y));
 		shipPosition.pos = new Vector3 (r.transform.position.x/terrDims.x, r.transform.position.z/terrDims.z, r.transform.position.y);
-		r.velocity = new Vector3 (Mathf.Round (1000f * r.velocity.x) / 1000f, Mathf.Round (1000f * r.velocity.y) / 1000f, Mathf.Round (1000f * r.velocity.z) / 1000f);
-		m.speed = r.velocity;
+		m.speed =  new Vector3 (Mathf.Round (1000f * r.velocity.x) / 1000f, Mathf.Round (1000f * r.velocity.z) / 1000f, Mathf.Round (1000f * r.velocity.y) / 1000f);
 		m.acceleration = forces;
+		*/
 	}
 
 	protected float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){
