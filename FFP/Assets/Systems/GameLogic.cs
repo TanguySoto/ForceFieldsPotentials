@@ -11,26 +11,26 @@ using FYFY;
  */
 
 public class GameLogic : FSystem {
-	
-	private Family pPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
-	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
-	private Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
 
-	private bool isShipInit = false;
-	private bool isFinishInit = false;
+	// ==== VARIABLES ====
+	
+	private static Family pPlanFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private static Family shipFamily 	= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private static Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
+
+	private static bool isShipInit 		= false;
+	private static bool isFinishInit 	= false;
 
 	// State of game
 	public enum STATES {SETUP, PLAYING, PAUSED, WON, LOST};
-	public static STATES state = STATES.PLAYING;
+	public static STATES state = STATES.SETUP;
+
+	// ==== LIFECYCLE ====
 	
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isShipInit) {
-			InitShip ();
-			isShipInit = true;
-		}
 		if (!isFinishInit) {
 			InitFinish ();
 			isFinishInit = true;
@@ -40,7 +40,9 @@ public class GameLogic : FSystem {
 	protected override void onProcess(int familiesUpdateCount) {
 	}
 
-	public void InitFinish(){
+	// ==== METHODS ====
+
+	protected void InitFinish(){
 		// Get Terrain dims to scale object
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		Vector3 terrDims = terr.terrainData.size;
@@ -59,14 +61,13 @@ public class GameLogic : FSystem {
 		}
 	}
 
-	public void InitShip(){
+	protected static void InitShip(){
 		// Get Terrain dims to scale object
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		Vector3 terrDims = terr.terrainData.size;
 
 		// Get associated dims and position
 		GameObject s = shipFamily.First();
-		Movement m = s.GetComponent<Movement> ();
 		Position position = s.GetComponent<Position> ();
 		Vector3 p = position.pos;
 		Transform tr = s.GetComponent<Transform> ();
@@ -74,8 +75,27 @@ public class GameLogic : FSystem {
 		// Move it to right position
 		Vector3 newPos = new Vector3 (p.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, p.y * terrDims.z);
 		tr.position = newPos;
-		// Put right initial speed
-		Rigidbody rb = s.GetComponent<Rigidbody>();
-		rb.velocity = m.speed;
+	}
+
+	public static void OnPlay(){
+		if (!isShipInit) {
+			InitShip ();
+			isShipInit = true;
+		}
+
+		state = STATES.PLAYING;
+	}
+
+	public static void OnPause(){
+		state = STATES.PAUSED;
+	}
+
+	public static void OnLost(){
+		state = STATES.LOST;
+	}
+
+	public static void OnWon(){
+		state = STATES.WON;
+		Debug.Log ("GG WP");
 	}
 }

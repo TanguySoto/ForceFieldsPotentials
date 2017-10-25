@@ -31,8 +31,7 @@ public class ForcesDisplay : FSystem {
 		
 	protected override void onProcess(int familiesUpdateCount) {
 	}
-
-
+		
 	// ==== METHODS ====
 
 	protected void refresh(){

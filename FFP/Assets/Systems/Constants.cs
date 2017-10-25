@@ -17,6 +17,7 @@ public class Constants : FSystem {
 	public static float BASE_PPLAN_HEIGHT 	= 0.5f;
 	public static float BASE_SOURCE_HEIGHT 	= 0.75f;
 
-	public static float FORCES_SCALING = 10;
-	public static float SOURCES_SIZE_SCALING = 10;
+	public static int 	FORCES_ROUNDING 		= 1000;	// give 3 numbers after floating point		
+	public static float FORCES_SCALING 			= 10;
+	public static float SOURCES_SIZE_SCALING 	= 10;
 }

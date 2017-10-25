@@ -13,7 +13,11 @@ using FYFY_plugins.CollisionManager;
 
 public class Collisions : FSystem {
 
+	// ==== VARIABLES ====
+
 	Family shipInCollision = FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
+
+	// ==== LIFECYCLE ====
 
 	protected override void onPause(int currentFrame) {
 	}
@@ -25,6 +29,8 @@ public class Collisions : FSystem {
 		resolveCollision ();
 	}
 
+	// ==== METHODS ====
+
 	protected void resolveCollision(){
 		if (shipInCollision.Count > 0 && GameLogic.state == GameLogic.STATES.PLAYING) {
 			GameObject ship = shipInCollision.First ();
@@ -32,8 +38,7 @@ public class Collisions : FSystem {
 
 			foreach (GameObject target in col.Targets) {
 				if (target.tag == "finish") {
-					Debug.Log ("GG");
-					GameLogic.state = GameLogic.STATES.WON;
+					GameLogic.OnWon ();
 				}
 			}
 		}

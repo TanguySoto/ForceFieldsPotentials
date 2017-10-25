@@ -14,9 +14,9 @@ public class ForcesComputation : FSystem {
 
 	// ==== VARIABLES ====
 
-	private Family pPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
-	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
-	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
+	private Family pPlanFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
 	private bool isShipMovable = true;
 
@@ -29,7 +29,7 @@ public class ForcesComputation : FSystem {
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
-		if (isShipMovable) {
+		if (isShipMovable && GameLogic.state==GameLogic.STATES.PLAYING) {
 			applyForceToShip ();
 		}
 	}
@@ -56,22 +56,20 @@ public class ForcesComputation : FSystem {
 			Field f = s.GetComponent<Field> ();
 			Position position = s.GetComponent<Position> ();
 			Vector3 p = position.pos;
-			forces.x += Mathf.Round(1000f * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/1000f;
-			forces.y += Mathf.Round(1000f * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/1000f;
+			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/Constants.FORCES_ROUNDING;
+			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/Constants.FORCES_ROUNDING;
 		}
 
-
-
-		// Apply force to the ship
+		// Apply force to the ship using Euler and rotate it in the direciton of the speed
 		m.acceleration = (forces/mass.mass);
 		m.speed += m.acceleration * Time.deltaTime;
 		shipPosition.pos += m.speed * Time.deltaTime; 
 
 		Transform tr = ship.GetComponent<Transform>();
 		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
+		tr.rotation = Quaternion.Euler(90, (360-Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg+90)%360,0);
 
-
-		/* Apply force using unity and thus allowing collisons
+		/* Apply force using unity and thus allowing smooth collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
 		r.AddForce (new Vector3(forces.x,forces.z,forces.y));
 		shipPosition.pos = new Vector3 (r.transform.position.x/terrDims.x, r.transform.position.z/terrDims.z, r.transform.position.y);
