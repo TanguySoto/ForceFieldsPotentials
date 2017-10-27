@@ -49,7 +49,7 @@ public class PlayerActions : FSystem {
 		}
 
 		if (!isSelectionInitialized) {
-			selectedMaterial = Resources.Load("Textures/SelectedMaterial",typeof(Material)) as Material;
+			selectedMaterial = Resources.Load("Materials/SelectedMaterial",typeof(Material)) as Material;
 			previousGameObject = null;
 			previousMaterial = null;
 			isSelectionInitialized = true;
