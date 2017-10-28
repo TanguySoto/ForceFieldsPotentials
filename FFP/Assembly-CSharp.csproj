@@ -45,7 +45,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\AssignSplatMap.cs" />
      <Compile Include="Assets\Components\CameraParams.cs" />
      <Compile Include="Assets\Components\Charge.cs" />
      <Compile Include="Assets\Components\Dimensions.cs" />

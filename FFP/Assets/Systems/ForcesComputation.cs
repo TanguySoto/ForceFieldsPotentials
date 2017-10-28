@@ -69,6 +69,8 @@ public class ForcesComputation : FSystem {
 		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
 		tr.rotation = Quaternion.Euler(90, (360-Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg+90)%360,0);
 
+		UI.UpdateShipInformations (ship);
+
 		/* Apply force using unity and thus allowing smooth collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
 		r.AddForce (new Vector3(forces.x,forces.z,forces.y));

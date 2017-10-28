@@ -35,6 +35,10 @@ public class GameLogic : FSystem {
 			InitFinish ();
 			isFinishInit = true;
 		}
+		if (!isShipInit) {
+			InitShip ();
+			isShipInit = true;
+		}
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
@@ -78,11 +82,12 @@ public class GameLogic : FSystem {
 	}
 
 	public static void OnPlay(){
-		if (!isShipInit) {
-			InitShip ();
-			isShipInit = true;
+		GameObject ship = shipFamily.First ();
+		Component.Destroy (ship.GetComponent<Editable> ());
+		if (PlayerActions.previousGameObject == ship) {
+			ship.GetComponent<Renderer> ().material = PlayerActions.selectedMaterial;
 		}
-
+		UI.UpdateShipInformations (ship);
 		state = STATES.PLAYING;
 	}
 

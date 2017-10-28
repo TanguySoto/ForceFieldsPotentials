@@ -31,10 +31,12 @@ public class PlayerActions : FSystem {
 
 	// === Object Selection
 	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
+	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 	private bool isSelectionInitialized = false;
 	private bool canPlayerSelect = true;
-	private Material selectedMaterial;
-	private GameObject previousGameObject;
+	public static Material selectedMaterial;
+	public static Material selectedAndEditableMaterial;
+	public static GameObject previousGameObject;
 	private Material previousMaterial;
 
 	// ==== LIFECYCLE ====
@@ -50,6 +52,7 @@ public class PlayerActions : FSystem {
 
 		if (!isSelectionInitialized) {
 			selectedMaterial = Resources.Load("Materials/SelectedMaterial",typeof(Material)) as Material;
+			selectedAndEditableMaterial = Resources.Load("Materials/SelectedAndEditableMaterial",typeof(Material)) as Material;
 			previousGameObject = null;
 			previousMaterial = null;
 			isSelectionInitialized = true;
@@ -77,16 +80,56 @@ public class PlayerActions : FSystem {
 				}
 				// change new go if it match our criteria
 				GameObject go = GameObject.Find(hit.collider.name);
-				if (previousGameObject != go && sourcesFamily.contains (go.GetInstanceID ())) {
-					previousMaterial = go.GetComponent<Renderer> ().material;
-					previousGameObject = go;
-					go.GetComponent<Renderer> ().material = selectedMaterial;
-				} else {
-					previousGameObject = null;
+
+				bool nothingFound = isSourcesSelected(go);
+				nothingFound &= isShipSelected (go);
+				if (nothingFound) {
 					previousMaterial = null;
+					previousGameObject = null;
 				}
 			}
 		}
+	}
+
+	protected bool isSourcesSelected(GameObject go){
+		// Sources
+		if (sourcesFamily.contains (go.GetInstanceID ())) {
+			previousMaterial = go.GetComponent<Renderer> ().material;
+			previousGameObject = go;
+
+			if (go.GetComponent<Editable> () == null) {
+				go.GetComponent<Renderer> ().material = selectedMaterial;
+			} else {
+				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
+			}
+
+			UI.UpdateSourcesInformations (go);
+			UI.Show (UI.sourcesInformationsPanel);
+			return true;
+		}
+
+		UI.Hide (UI.sourcesInformationsPanel);
+		return false;
+	}
+
+	protected bool isShipSelected(GameObject go){
+		// Ship
+		if (shipFamily.contains (go.GetInstanceID ())) {
+			previousMaterial = go.GetComponent<Renderer> ().material;
+			previousGameObject = go;
+
+			if (go.GetComponent<Editable> () == null) {
+				go.GetComponent<Renderer> ().material = selectedMaterial;
+			} else {
+				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
+			}
+
+			UI.Show (UI.shipSpeedPanel);
+			return true;
+		} 
+
+		UI.Hide (UI.shipSpeedPanel);
+		return false;
 	}
 
 	// === Camera
