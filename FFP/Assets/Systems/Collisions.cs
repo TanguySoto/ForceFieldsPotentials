@@ -15,7 +15,10 @@ public class Collisions : FSystem {
 
 	// ==== VARIABLES ====
 
-	Family shipInCollision = FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
+	private Family shipInCollision 	= FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+
+	private bool isCollisionsInit = false;
 
 	// ==== LIFECYCLE ====
 
@@ -23,6 +26,10 @@ public class Collisions : FSystem {
 	}
 
 	protected override void onResume(int currentFrame){
+		if (!isCollisionsInit) {
+			SystemsManager.AddFSystem (this);
+			isCollisionsInit = true;
+		}
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
@@ -31,16 +38,21 @@ public class Collisions : FSystem {
 
 	// ==== METHODS ====
 
+	// TODO bug once on scene reload
 	protected void resolveCollision(){
-		if (shipInCollision.Count > 0 && GameLogic.state == GameLogic.STATES.PLAYING) {
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		if (shipInCollision.Count > 0 && gl.state == GameLogic.STATES.PLAYING) {
 			GameObject ship = shipInCollision.First ();
 			InCollision3D col = ship.GetComponent<InCollision3D> ();
 
 			foreach (GameObject target in col.Targets) {
 				if (target.tag == "finish") {
-					GameLogic.OnWon ();
+					gl.OnWon ();
 				}
 			}
+		} else if (shipFamily.First ().GetComponent<Position> ().pos.x > 1 || shipFamily.First ().GetComponent<Position> ().pos.y > 1
+			|| shipFamily.First ().GetComponent<Position> ().pos.x < 0 || shipFamily.First ().GetComponent<Position> ().pos.y < 0) {
+			gl.OnLost ();
 		}
 	}
 }

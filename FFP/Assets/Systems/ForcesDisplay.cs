@@ -16,11 +16,12 @@ public class ForcesDisplay : FSystem {
 
 	// ==== VARIABLES ====
 
-	private static Family pPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
-	private static Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
+	private Family pPlanFamily	 = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
-	private static bool isShowSources 	= true;
-	private static bool isShowFields 	= true;
+	private bool isShowSources 			= true;
+	private bool isShowFields 			= true;
+	private bool isForcesDisplayInit 	= false;
 
 	// ==== LIFECYCLE ====
 	
@@ -28,6 +29,11 @@ public class ForcesDisplay : FSystem {
 	}
 
 	protected override void onResume(int currentFrame){
+		if (!isForcesDisplayInit) {
+			SystemsManager.AddFSystem (this);
+			isForcesDisplayInit = true;
+		}
+
 		refresh ();
 	}
 		
@@ -36,7 +42,7 @@ public class ForcesDisplay : FSystem {
 		
 	// ==== METHODS ====
 
-	public static void refresh(){
+	public void refresh(){
 		if (isShowFields) {
 			showFields ();
 			showFieldsColors ();
@@ -46,7 +52,7 @@ public class ForcesDisplay : FSystem {
 		}
 	}
 
-	protected static void showFields(){
+	protected void showFields(){
 		// Get Terrain
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 
@@ -82,7 +88,7 @@ public class ForcesDisplay : FSystem {
 	/**
 	 * From https://alastaira.wordpress.com/2013/11/14/procedural-terrain-splatmapping/ and adapted to ECS
 	 */
-	protected static void showFieldsColors(){
+	protected void showFieldsColors(){
 		// Get the terrain
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 
@@ -135,7 +141,7 @@ public class ForcesDisplay : FSystem {
 		terrainData.SetAlphamaps(0, 0, splatmapData);
 	}
 
-	protected static void showSources(){
+	protected void showSources(){
 		// Get Terrain dims to scale object
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		Vector3 terrDims = terr.terrainData.size;
@@ -162,7 +168,7 @@ public class ForcesDisplay : FSystem {
 		}
 	}
 
-	protected static float gaussian(float x0, float y0, float sigx, float sigy, float A, float x, float y){
+	protected float gaussian(float x0, float y0, float sigx, float sigy, float A, float x, float y){
 		return A * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
 	}
 }

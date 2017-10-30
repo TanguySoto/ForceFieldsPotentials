@@ -19,7 +19,7 @@ public class PlayerActions : FSystem {
 	// === Camera
 	private Family cameraFamily = FamilyManager.getFamily(new AllOfComponents(typeof(CameraParams)));
 	private bool isCameraInitialized = false;
-	private bool isCameraMovable = true;
+	private bool isCameraMovable	 = true;
 	private float xDeg = 0.0f;
 	private float yDeg = 0.0f;
 	private float currentDistance;
@@ -30,13 +30,13 @@ public class PlayerActions : FSystem {
 	private Vector3 position;
 
 	// === Object Selection
-	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
-	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 	private bool isSelectionInitialized = false;
-	private bool canPlayerSelect = true;
-	public static Material selectedMaterial;
-	public static Material selectedAndEditableMaterial;
-	public static GameObject previousGameObject;
+	private bool canPlayerSelect 		= true;
+	public Material selectedMaterial;
+	public Material selectedAndEditableMaterial;
+	public GameObject previousGameObject;
 	private Material previousMaterial;
 
 	// ==== LIFECYCLE ====
@@ -46,6 +46,7 @@ public class PlayerActions : FSystem {
 
 	protected override void onResume(int currentFrame){
 		if (!isCameraInitialized) {
+			SystemsManager.AddFSystem (this);
 			InitCamera ();
 			isCameraInitialized = true;
 		}
@@ -92,6 +93,8 @@ public class PlayerActions : FSystem {
 	}
 
 	protected bool isSourcesSelected(GameObject go){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+
 		// Sources
 		if (sourcesFamily.contains (go.GetInstanceID ())) {
 			previousMaterial = go.GetComponent<Renderer> ().material;
@@ -103,16 +106,17 @@ public class PlayerActions : FSystem {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
 			}
 
-			UI.UpdateSourcesInformations (go);
-			UI.Show (UI.sourcesInformationsPanel);
+			ui.UpdateSourcesInformations (go);
+			ui.Show (ui.sourcesInformationsPanel);
 			return true;
 		}
 
-		UI.Hide (UI.sourcesInformationsPanel);
+		ui.Hide (ui.sourcesInformationsPanel);
 		return false;
 	}
 
 	protected bool isShipSelected(GameObject go){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		// Ship
 		if (shipFamily.contains (go.GetInstanceID ())) {
 			previousMaterial = go.GetComponent<Renderer> ().material;
@@ -124,11 +128,11 @@ public class PlayerActions : FSystem {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
 			}
 
-			UI.Show (UI.shipSpeedPanel);
+			ui.Show (ui.shipSpeedPanel);
 			return true;
 		} 
 
-		UI.Hide (UI.shipSpeedPanel);
+		ui.Hide (ui.shipSpeedPanel);
 		return false;
 	}
 
@@ -165,7 +169,7 @@ public class PlayerActions : FSystem {
 		yDeg = Vector3.Angle(Vector3.up, transform.up );
 	}
 
-	void CameraUpdate()
+	protected void CameraUpdate()
 	{
 		// Get data according to ECS
 		GameObject camera = cameraFamily.First ();

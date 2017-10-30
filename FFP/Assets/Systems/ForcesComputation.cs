@@ -19,6 +19,7 @@ public class ForcesComputation : FSystem {
 	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
 	private bool isShipMovable = true;
+	private bool isForcesComputationInit = false;
 
 	// ==== LIFECYCLE ====
 	
@@ -26,10 +27,15 @@ public class ForcesComputation : FSystem {
 	}
 		
 	protected override void onResume(int currentFrame){
+		if (!isForcesComputationInit) {
+			SystemsManager.AddFSystem (this);
+			isForcesComputationInit = true;
+		}
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
-		if (isShipMovable && GameLogic.state==GameLogic.STATES.PLAYING) {
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		if (isShipMovable && gl.state==GameLogic.STATES.PLAYING) {
 			applyForceToShip ();
 		}
 	}
@@ -69,7 +75,8 @@ public class ForcesComputation : FSystem {
 		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
 		tr.rotation = Quaternion.Euler(90, (360-Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg+90)%360,0);
 
-		UI.UpdateShipInformations (ship);
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+		ui.UpdateShipInformations (ship);
 
 		/* Apply force using unity and thus allowing smooth collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
@@ -80,11 +87,11 @@ public class ForcesComputation : FSystem {
 		*/
 	}
 
-	protected float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){
+	public static float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){
 		return Constants.FORCES_SCALING * A * ((x-x0)/(sigx*sigx)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
 	}
 
-	protected float gaussianDerivativeY(float x0, float y0, float sigx, float sigy, float A, float x, float y){
+	public static float gaussianDerivativeY(float x0, float y0, float sigx, float sigy, float A, float x, float y){
 		return Constants.FORCES_SCALING *A * ((y-y0)/(sigy*sigy)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
 	}
 }

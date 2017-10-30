@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using FYFY;
 
@@ -18,31 +19,31 @@ public class UI : FSystem {
 	private static Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 
 	// === LaunchButton
-	private static Button launchButton;
+	public Button launchButton;
 
 	// === Ship speed
-	public static CanvasGroup shipSpeedPanel;
-	private static Slider speedIntensitySlider;
-	private static Text speedIntensityText;
-	private static Slider speedAngleSlider;
-	private static Text speedAngleText;
+	public CanvasGroup shipSpeedPanel;
+	private Slider 	speedIntensitySlider;
+	private Text 	speedIntensityText;
+	private Slider 	speedAngleSlider;
+	private Text 	speedAngleText;
 
 	// === Sources informations
-	public static CanvasGroup sourcesInformationsPanel;
-	private static Slider sourceStrengthSlider;
-	private static Text sourceStrengthText;
-	private static Slider sourceRadiusSlider;
-	private static Text sourceRadiusText;
+	public CanvasGroup sourcesInformationsPanel;
+	private Slider 	sourceStrengthSlider;
+	private Text 	sourceStrengthText;
+	private Slider 	sourceRadiusSlider;
+	private Text 	sourceRadiusText;
 
-	private static bool isUIInit = false;
+	private bool isUIInit = false;
 
 	// ==== LIFECYCLE ====
-
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
 		if (!isUIInit) {
+			SystemsManager.AddFSystem (this);
 			InitUI ();
 			isUIInit = true;
 		}
@@ -81,24 +82,28 @@ public class UI : FSystem {
 		
 	// === Launch button
 	protected void OnLaunchButtonClicked(){
-		switch (GameLogic.state) {
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+
+		switch (gl.state) {
 		case GameLogic.STATES.SETUP:
-			GameLogic.OnPlay ();
+			gl.OnPlay ();
 			launchButton.GetComponentInChildren<Text> ().text = "Pause";
 			break;
 		case GameLogic.STATES.PLAYING:
-			GameLogic.OnPause ();
+			gl.OnPause ();
 			launchButton.GetComponentInChildren<Text> ().text = "Play";
 			break;
 		case GameLogic.STATES.PAUSED:
-			GameLogic.OnPlay ();
+			gl.OnPlay ();
 			launchButton.GetComponentInChildren<Text> ().text = "Pause";
 			break;
 		case GameLogic.STATES.WON:
-			// TODO
+			SystemsManager.ResetFSystems ();
+			GameObjectManager.loadScene ("scene_test");
 			break;
 		case GameLogic.STATES.LOST:
-			// TODO
+			SystemsManager.ResetFSystems ();
+			GameObjectManager.loadScene ("scene_test");
 			break;
 		default:
 			break;
@@ -106,7 +111,7 @@ public class UI : FSystem {
 	}
 
 	// === Ship speed
-	public static void UpdateShipInformations(GameObject ship){
+	public void UpdateShipInformations(GameObject ship){
 		Movement m = ship.GetComponent<Movement> ();
 		speedIntensityText.text = (Mathf.Round(100f*m.speed.magnitude)/100f) + " m/s";
 		speedAngleText.text = ((int)(Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg)) + "°";
@@ -149,7 +154,7 @@ public class UI : FSystem {
 	}
 
 	// === Source informations
-	public static void UpdateSourcesInformations(GameObject sources){
+	public void UpdateSourcesInformations(GameObject sources){
 		Field f = sources.GetComponent<Field> ();
 		sourceStrengthSlider.value = (int)(f.A*100);
 		sourceRadiusSlider.value = (int)(f.sigx*100);
@@ -167,7 +172,8 @@ public class UI : FSystem {
 		value = value/100f;
 
 		// New value
-		GameObject source = PlayerActions.previousGameObject;
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
 		Field f = source.GetComponent<Field> ();
 		f.A = value;
 
@@ -175,14 +181,16 @@ public class UI : FSystem {
 		sourceStrengthText.text = value +"";
 
 		// Update scene
-		ForcesDisplay.refresh();
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
 	}
 
 	protected void OnSliderRadiusChanged(float value){
 		value = value/100f;
 
 		// New value
-		GameObject source = PlayerActions.previousGameObject;
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
 		Field f = source.GetComponent<Field> ();
 		f.sigx = value;
 		f.sigy = value;
@@ -191,21 +199,22 @@ public class UI : FSystem {
 		sourceRadiusText.text = value +"";
 
 		// Update scene
-		ForcesDisplay.refresh();
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
 	}
 
 	// === General
-	public static void Hide(CanvasGroup cg){
+	public void Hide(CanvasGroup cg){
 		cg.alpha = 0;
 		cg.blocksRaycasts = false;
 	}
 
-	public static void Show(CanvasGroup cg){
+	public void Show(CanvasGroup cg){
 		cg.alpha = 1;
 		cg.blocksRaycasts = true;
 	}
 
-	public static void HideAllPanels(){
+	public void HideAllPanels(){
 		// Ship
 		shipSpeedPanel.alpha = 0;
 		shipSpeedPanel.blocksRaycasts = false;

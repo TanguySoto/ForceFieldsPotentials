@@ -59,6 +59,7 @@
      <Compile Include="Assets\Systems\ForcesDisplay.cs" />
      <Compile Include="Assets\Systems\GameLogic.cs" />
      <Compile Include="Assets\Systems\PlayerActions.cs" />
+     <Compile Include="Assets\Systems\SystemsManager.cs" />
      <Compile Include="Assets\Systems\UI.cs" />
      <None Include="Assets\Libraries\FYFY_Inspector.xml" />
      <None Include="Assets\Libraries\FYFY.xml" />

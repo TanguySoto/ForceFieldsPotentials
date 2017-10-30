@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using FYFY;
 
 /*
@@ -14,16 +15,16 @@ public class GameLogic : FSystem {
 
 	// ==== VARIABLES ====
 	
-	private static Family pPlanFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
-	private static Family shipFamily 	= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
-	private static Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
+	private Family pPlanFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private Family shipFamily 	= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
 
-	private static bool isShipInit 		= false;
-	private static bool isFinishInit 	= false;
+	private bool isShipInit 	= false;
+	private bool isFinishInit 	= false;
 
 	// State of game
 	public enum STATES {SETUP, PLAYING, PAUSED, WON, LOST};
-	public static STATES state = STATES.SETUP;
+	public STATES state = STATES.SETUP;
 
 	// ==== LIFECYCLE ====
 	
@@ -32,6 +33,7 @@ public class GameLogic : FSystem {
 
 	protected override void onResume(int currentFrame){
 		if (!isFinishInit) {
+			SystemsManager.AddFSystem (this);
 			InitFinish ();
 			isFinishInit = true;
 		}
@@ -65,7 +67,7 @@ public class GameLogic : FSystem {
 		}
 	}
 
-	protected static void InitShip(){
+	protected void InitShip(){
 		// Get Terrain dims to scale object
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		Vector3 terrDims = terr.terrainData.size;
@@ -81,26 +83,35 @@ public class GameLogic : FSystem {
 		tr.position = newPos;
 	}
 
-	public static void OnPlay(){
+	public void OnPlay(){
 		GameObject ship = shipFamily.First ();
 		Component.Destroy (ship.GetComponent<Editable> ());
-		if (PlayerActions.previousGameObject == ship) {
-			ship.GetComponent<Renderer> ().material = PlayerActions.selectedMaterial;
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+
+		if (pa.previousGameObject == ship) {
+			ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
 		}
-		UI.UpdateShipInformations (ship);
+
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+		ui.UpdateShipInformations (ship);
 		state = STATES.PLAYING;
 	}
 
-	public static void OnPause(){
+	public void OnPause(){
 		state = STATES.PAUSED;
 	}
 
-	public static void OnLost(){
+	public void OnLost(){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+		ui.launchButton.GetComponentInChildren<Text> ().text = "Retry";
+		Debug.Log ("LOST NOOB");
 		state = STATES.LOST;
 	}
 
-	public static void OnWon(){
-		state = STATES.WON;
+	public void OnWon(){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+		ui.launchButton.GetComponentInChildren<Text> ().text = "Replay";
 		Debug.Log ("GG WP");
+		state = STATES.WON;
 	}
 }
