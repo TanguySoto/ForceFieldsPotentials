@@ -52,7 +52,9 @@ public class Collisions : FSystem {
 			}
 		} else if (shipFamily.First ().GetComponent<Position> ().pos.x > 1 || shipFamily.First ().GetComponent<Position> ().pos.y > 1
 			|| shipFamily.First ().GetComponent<Position> ().pos.x < 0 || shipFamily.First ().GetComponent<Position> ().pos.y < 0) {
-			gl.OnLost ();
+			if (gl.state != GameLogic.STATES.LOST) {
+				gl.OnLost ();
+			}
 		}
 	}
 }

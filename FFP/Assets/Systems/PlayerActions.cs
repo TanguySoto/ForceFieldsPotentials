@@ -39,6 +39,12 @@ public class PlayerActions : FSystem {
 	public GameObject previousGameObject;
 	private Material previousMaterial;
 
+	// === Object drag and drob
+	private Family PPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private bool isMouseDrag = false;
+	private Vector3 screenPosition;
+	private Vector3 offset;
+
 	// ==== LIFECYCLE ====
 	
 	protected override void onPause(int currentFrame) {
@@ -67,61 +73,93 @@ public class PlayerActions : FSystem {
 
 	// ==== METHODS ====
 
-	// === Object Selection
+	// === Object Selection and Drag & drop
 	protected void DetectMouseSelection(){  
 		if (Input.GetMouseButtonDown (0)) {
-			
+
+			// try selecting no object
 			RaycastHit hit = new RaycastHit();
 			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-		  
+
+			// touched something
 			if (Physics.Raycast (ray, out hit)) {
-				// put old go material back
+
+				// unselect previous object
 				if (previousGameObject != null) {
 					previousGameObject.GetComponent<Renderer> ().material = previousMaterial;
-				}
-				// change new go if it match our criteria
-				GameObject go = GameObject.Find(hit.collider.name);
-
-				bool nothingFound = isSourcesSelected(go);
-				nothingFound &= isShipSelected (go);
-				if (nothingFound) {
 					previousMaterial = null;
 					previousGameObject = null;
 				}
+				
+				// select now object if it match our criteria
+				GameObject go = GameObject.Find (hit.collider.name);
+				isSourceSelected (go);
+				isShipSelected (go);
 			}
 		}
+
+		if (Input.GetMouseButtonUp(0)){
+			isMouseDrag = false;
+		}
+
+		if (isMouseDrag){
+			//track mouse position.
+			Vector3 currentScreenSpace = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z);
+			//convert screen position to world position with offset changes.
+			Vector3 currentPosition = Camera.main.ScreenToWorldPoint(currentScreenSpace) + offset;
+
+			//It will update target gameobject's current postion.
+			Terrain terr = PPlanFamily.First ().GetComponent<Terrain>();
+			TerrainData td = terr.terrainData;
+			Vector3 relativeNewPos = new Vector3 (currentPosition.x / td.size.x, currentPosition.z / td.size.z, previousGameObject.GetComponent<Position> ().pos.z);
+			if (relativeNewPos.x <= 1 && relativeNewPos.x >= 0 && relativeNewPos.y <= 1 && relativeNewPos.y >= 0) {
+				previousGameObject.transform.position = new Vector3(currentPosition.x,previousGameObject.transform.position.y,currentPosition.z);
+				previousGameObject.GetComponent<Position> ().pos = relativeNewPos;
+
+				// Refresh forces
+				ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem ("ForcesDisplay");
+				fd.refresh ();
+			}
+		}	
 	}
 
-	protected bool isSourcesSelected(GameObject go){
+	protected bool isSourceSelected(GameObject go){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 
-		// Sources
+		// Source found
 		if (sourcesFamily.contains (go.GetInstanceID ())) {
 			previousMaterial = go.GetComponent<Renderer> ().material;
 			previousGameObject = go;
 
+			// Still editable ?
 			if (go.GetComponent<Editable> () == null) {
 				go.GetComponent<Renderer> ().material = selectedMaterial;
 			} else {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
+				// prepare dragging
+				isMouseDrag = true;
+				screenPosition = Camera.main.WorldToScreenPoint(go.transform.position);
+				offset = go.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z));
 			}
 
 			ui.UpdateSourcesInformations (go);
 			ui.Show (ui.sourcesInformationsPanel);
 			return true;
 		}
-
+			
 		ui.Hide (ui.sourcesInformationsPanel);
 		return false;
 	}
 
 	protected bool isShipSelected(GameObject go){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		// Ship
+
+		// Ship found
 		if (shipFamily.contains (go.GetInstanceID ())) {
 			previousMaterial = go.GetComponent<Renderer> ().material;
 			previousGameObject = go;
 
+			// Still editable ?
 			if (go.GetComponent<Editable> () == null) {
 				go.GetComponent<Renderer> ().material = selectedMaterial;
 			} else {

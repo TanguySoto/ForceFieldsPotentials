@@ -17,6 +17,7 @@ public class GameLogic : FSystem {
 	
 	private Family pPlanFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
 	private Family shipFamily 	= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 	private Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
 
 	private bool isShipInit 	= false;
@@ -84,16 +85,27 @@ public class GameLogic : FSystem {
 	}
 
 	public void OnPlay(){
-		GameObject ship = shipFamily.First ();
-		Component.Destroy (ship.GetComponent<Editable> ());
+		// Systems needed
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
 
+		// make ship not editable anymore
+		GameObject ship = shipFamily.First ();
+		Component.Destroy (ship.GetComponent<Editable> ());
 		if (pa.previousGameObject == ship) {
 			ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
+			ui.UpdateShipInformations (ship);
 		}
 
-		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		ui.UpdateShipInformations (ship);
+		// make sources not editable anymore
+		foreach (GameObject s in sourcesFamily) {
+			Component.Destroy (s.GetComponent<Editable> ());
+			if (pa.previousGameObject == s) {
+				s.GetComponent<Renderer> ().material = pa.selectedMaterial;
+				ui.UpdateSourcesInformations (s);
+			}
+		}
+
 		state = STATES.PLAYING;
 	}
 

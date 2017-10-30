@@ -16,8 +16,16 @@ public class UI : FSystem {
 
 	// ==== VARIABLES ====
 
-	private static Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 
+	// === Timers
+	private int totalTime = 0;
+	private int travelTime = 0;
+
+	private Text totalTimeText;
+	private Text travelTimeText;
+
+	// === FPS
 	static string[] stringsFrom00To99 = {
 		"00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
 		"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -31,7 +39,6 @@ public class UI : FSystem {
 		"90", "91", "92", "93", "94", "95", "96", "97", "98", "99"
 	};
 
-	// === FPS
 	private int highestFPS;
 	private int lowestFPS;
 	private int FPS;
@@ -73,11 +80,17 @@ public class UI : FSystem {
 
 	protected override void onProcess(int familiesUpdateCount) {
 		UpdateFPS ();
+		UpdateTimers ();
+
 	}
 
 	// ==== METHODS ====
 
 	protected void InitUI(){
+		// === Timers
+		totalTimeText = GameObject.Find("TotalTime").GetComponent<Text>();
+		travelTimeText = GameObject.Find ("TravelTime").GetComponent<Text> ();
+
 		// === FPS
 		highestFPSLabel = GameObject.Find("HighestFPSLabel").GetComponent<Text>();
 		FPSLabel = GameObject.Find("FPSLabel").GetComponent<Text>();
@@ -107,6 +120,27 @@ public class UI : FSystem {
 		sourceRadiusSlider = GameObject.Find("SliderRadius").GetComponent<Slider>();
 		sourceRadiusSlider.onValueChanged.AddListener((float value) => OnSliderRadiusChanged (value));
 		sourceRadiusText = GameObject.Find("TextRadius").GetComponent<Text>();
+	}
+
+	// === Timer
+	protected void UpdateTimers(){
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+
+		// update timers
+		if (gl.state != GameLogic.STATES.LOST && gl.state != GameLogic.STATES.WON) {
+			totalTime += (int)Mathf.Round (100f * Time.deltaTime);
+		}
+		if (gl.state==GameLogic.STATES.PLAYING) {
+			travelTime += (int)Mathf.Round (100f * Time.deltaTime);
+		}
+
+		// update UI
+		int seconds = totalTime/100;
+		int centiemes = totalTime % 100;
+		totalTimeText.text = string.Format ("{0:0}.{1:00} s", seconds, centiemes);
+		seconds = travelTime / 100;
+		centiemes = travelTime % 100;
+		travelTimeText.text = string.Format ("{0:0}.{1:00} s", seconds, centiemes);
 	}
 
 	// === FPS
