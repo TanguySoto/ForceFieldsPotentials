@@ -18,6 +18,28 @@ public class UI : FSystem {
 
 	private static Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 
+	static string[] stringsFrom00To99 = {
+		"00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
+		"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+		"20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+		"30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+		"40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+		"50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+		"60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
+		"70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
+		"80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+		"90", "91", "92", "93", "94", "95", "96", "97", "98", "99"
+	};
+
+	// === FPS
+	private int highestFPS;
+	private int lowestFPS;
+	private int FPS;
+	private int frameRange = 60;
+	private int[] fpsBuffer;
+	private int fpsBufferIndex = 0;
+	private Text FPSLabel, highestFPSLabel, lowestFPSLabel;
+
 	// === LaunchButton
 	public Button launchButton;
 
@@ -50,11 +72,18 @@ public class UI : FSystem {
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
+		UpdateFPS ();
 	}
 
 	// ==== METHODS ====
 
 	protected void InitUI(){
+		// === FPS
+		highestFPSLabel = GameObject.Find("HighestFPSLabel").GetComponent<Text>();
+		FPSLabel = GameObject.Find("FPSLabel").GetComponent<Text>();
+		lowestFPSLabel = GameObject.Find("LowestFPSLabel").GetComponent<Text>();
+		fpsBuffer = new int[frameRange];
+
 		// === Launch button
 		launchButton = GameObject.Find ("ButtonLaunch").GetComponent<Button> ();
 		launchButton.onClick.AddListener (() => OnLaunchButtonClicked ());
@@ -78,6 +107,37 @@ public class UI : FSystem {
 		sourceRadiusSlider = GameObject.Find("SliderRadius").GetComponent<Slider>();
 		sourceRadiusSlider.onValueChanged.AddListener((float value) => OnSliderRadiusChanged (value));
 		sourceRadiusText = GameObject.Find("TextRadius").GetComponent<Text>();
+	}
+
+	// === FPS
+	protected void UpdateFPS(){
+		// add last frame
+		fpsBuffer[fpsBufferIndex++] = (int)(1f / Time.unscaledDeltaTime);
+		if (fpsBufferIndex >= frameRange) {
+			fpsBufferIndex = 0;
+		}
+		// calculate average
+		int sum = 0;
+		int highest = 0;
+		int lowest = int.MaxValue;
+		for (int i = 0; i < frameRange; i++) {
+			int fps = fpsBuffer[i];
+			sum += fps;
+			if (fps > highest) {
+				highest = fps;
+			}
+			if (fps < lowest) {
+				lowest = fps;
+			}
+		}
+		FPS = sum / frameRange;
+		highestFPS = highest;
+		lowestFPS = lowest;
+
+		// update UI
+		highestFPSLabel.text = stringsFrom00To99[Mathf.Clamp(highestFPS, 0, 99)];
+		FPSLabel.text = stringsFrom00To99[Mathf.Clamp(FPS, 0, 99)];
+		lowestFPSLabel.text = stringsFrom00To99[Mathf.Clamp(lowestFPS, 0, 99)];
 	}
 		
 	// === Launch button
