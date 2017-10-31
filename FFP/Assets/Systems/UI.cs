@@ -92,6 +92,9 @@ public class UI : FSystem {
 	private Button deleteButton;
 	private Text fieldLeft;
 
+	// === Minimap
+	private Camera miniMapCamera;
+
 	private bool isUIInit = false;
 
 	// ==== LIFECYCLE ====
@@ -177,14 +180,19 @@ public class UI : FSystem {
 		deleteButton.onClick.AddListener (() => OnDeleteButtonClicked ());
 		fieldLeft = GameObject.Find("SourcesLeft").GetComponent<Text>();
 		fieldLeft.text = ""+GameObject.Find ("SourcesLeft").GetComponent<FieldsCounter> ().fieldsLeft;
+
+		// === MiniMap
+		miniMapCamera = GameObject.Find("SecondaryCamera").GetComponent<Camera>();	
 	}
 
 	// === Hide Toggle
 	protected void OnHideToggled(bool value){
 		if (value) {
+			miniMapCamera.gameObject.SetActive (false);
 			mainCanvasGroup.alpha = 0;
 			mainCanvasGroup.blocksRaycasts = false;
 		} else {
+			miniMapCamera.gameObject.SetActive (true);
 			mainCanvasGroup.alpha = 1;
 			mainCanvasGroup.blocksRaycasts = true;
 		}

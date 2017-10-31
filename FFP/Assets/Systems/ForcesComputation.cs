@@ -45,8 +45,6 @@ public class ForcesComputation : FSystem {
 	protected void applyForceToShip(){
 		// Get Terrain heightMap and place it
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
-		int hmWidth = terr.terrainData.heightmapWidth;
-		int hmHeight = terr.terrainData.heightmapHeight;
 		Vector3 terrDims = terr.terrainData.size;
 
 		// Get the ship and its position, speed, acc and mass
@@ -84,7 +82,6 @@ public class ForcesComputation : FSystem {
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		int hmWidth = terr.terrainData.heightmapWidth;
 		int hmHeight = terr.terrainData.heightmapHeight;
-		Vector3 terrDims = terr.terrainData.size;
 
 		Vector3 forces = Vector3.zero;
 		foreach(GameObject s in sourcesFamily){
