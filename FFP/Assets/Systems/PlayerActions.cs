@@ -37,7 +37,7 @@ public class PlayerActions : FSystem {
 	public Material selectedMaterial;
 	public Material selectedAndEditableMaterial;
 	public GameObject previousGameObject;
-	private Material previousMaterial;
+	public Material previousMaterial;
 
 	// === Object drag and drob
 	private Family PPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));

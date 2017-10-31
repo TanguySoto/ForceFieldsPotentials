@@ -89,20 +89,27 @@ public class GameLogic : FSystem {
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
 
+		// close Add & Del sources panel
+		ui.Hide(ui.sourceAddDelPanel);
+
 		// make ship not editable anymore
 		GameObject ship = shipFamily.First ();
-		Component.Destroy (ship.GetComponent<Editable> ());
-		if (pa.previousGameObject == ship) {
-			ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
-			ui.UpdateShipInformations (ship);
+		if (ship.GetComponent<Editable> () != null) {
+			GameObjectManager.removeComponent<Editable> (ship);
+			if (pa.previousGameObject == ship) {
+				ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
+				ui.UpdateShipInformations (ship);
+			}
 		}
 
 		// make sources not editable anymore
 		foreach (GameObject s in sourcesFamily) {
-			Component.Destroy (s.GetComponent<Editable> ());
-			if (pa.previousGameObject == s) {
-				s.GetComponent<Renderer> ().material = pa.selectedMaterial;
-				ui.UpdateSourcesInformations (s);
+			if (s.GetComponent<Editable> () != null) {
+				GameObjectManager.removeComponent<Editable> (s);
+				if (pa.previousGameObject == s) {
+					s.GetComponent<Renderer> ().material = pa.selectedMaterial;
+					ui.UpdateSourcesInformations (s);
+				}
 			}
 		}
 

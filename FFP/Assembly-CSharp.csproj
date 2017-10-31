@@ -50,6 +50,7 @@
      <Compile Include="Assets\Components\Dimensions.cs" />
      <Compile Include="Assets\Components\Editable.cs" />
      <Compile Include="Assets\Components\Field.cs" />
+     <Compile Include="Assets\Components\FieldsCounter.cs" />
      <Compile Include="Assets\Components\Mass.cs" />
      <Compile Include="Assets\Components\Movement.cs" />
      <Compile Include="Assets\Components\Position.cs" />

@@ -31,6 +31,7 @@ public class ForcesDisplay : FSystem {
 	protected override void onResume(int currentFrame){
 		if (!isForcesDisplayInit) {
 			SystemsManager.AddFSystem (this);
+			init ();
 			isForcesDisplayInit = true;
 		}
 
@@ -41,6 +42,11 @@ public class ForcesDisplay : FSystem {
 	}
 		
 	// ==== METHODS ====
+
+	protected void init(){
+		sourcesFamily.addEntryCallback (OnSourceEntered);
+		sourcesFamily.addExitCallback (OnSourceExited);
+	}
 
 	public void refresh(){
 		if (isShowFields) {
@@ -87,6 +93,7 @@ public class ForcesDisplay : FSystem {
 
 	/**
 	 * From https://alastaira.wordpress.com/2013/11/14/procedural-terrain-splatmapping/ and adapted to ECS
+	 * TODO make faster
 	 */
 	protected void showFieldsColors(){
 		// Get the terrain
@@ -166,6 +173,14 @@ public class ForcesDisplay : FSystem {
 			dims.height = 1;
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
 		}
+	}
+
+	protected void OnSourceEntered(GameObject s){
+		refresh ();
+	}
+
+	protected void OnSourceExited(int id){
+		refresh ();
 	}
 
 	protected float gaussian(float x0, float y0, float sigx, float sigy, float A, float x, float y){

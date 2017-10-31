@@ -17,6 +17,13 @@ public class UI : FSystem {
 	// ==== VARIABLES ====
 
 	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family editableSourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position), typeof(Editable)));
+
+	// === Main panel
+	CanvasGroup mainCanvasGroup;
+
+	// === Hide panel
+	private Toggle hideInterface;
 
 	// === Timers
 	private int totalTime = 0;
@@ -58,11 +65,20 @@ public class UI : FSystem {
 	private Text 	speedAngleText;
 
 	// === Sources informations
+	protected Material lavaMaterial;
+	protected Material circuitMaterial;
+
 	public CanvasGroup sourcesInformationsPanel;
 	private Slider 	sourceStrengthSlider;
 	private Text 	sourceStrengthText;
 	private Slider 	sourceRadiusSlider;
 	private Text 	sourceRadiusText;
+
+	// === Sources add/del panel
+	public CanvasGroup sourceAddDelPanel;
+	private Button addButton;
+	private Button deleteButton;
+	private Text fieldLeft;
 
 	private bool isUIInit = false;
 
@@ -87,6 +103,11 @@ public class UI : FSystem {
 	// ==== METHODS ====
 
 	protected void InitUI(){
+		//=== Hide Toggle
+		hideInterface = GameObject.Find("HideToggle").GetComponent<Toggle>();
+		hideInterface.onValueChanged.AddListener ((bool value) => OnHideToggled (value));
+		mainCanvasGroup = GameObject.Find ("MainPanel").GetComponent<CanvasGroup> (); 
+
 		// === Timers
 		totalTimeText = GameObject.Find("TotalTime").GetComponent<Text>();
 		travelTimeText = GameObject.Find ("TravelTime").GetComponent<Text> ();
@@ -112,6 +133,8 @@ public class UI : FSystem {
 		speedAngleText = GameObject.Find("TextAngle").GetComponent<Text>();
 
 		// === Source Informations
+		lavaMaterial = Resources.Load("Materials/LavaMaterial",typeof(Material)) as Material;
+		circuitMaterial = Resources.Load("Materials/CircuitryMaterial",typeof(Material)) as Material;
 		sourcesInformationsPanel = GameObject.Find("SourcesPanel").GetComponent<CanvasGroup>();
 		Hide (sourcesInformationsPanel);
 		sourceStrengthSlider = GameObject.Find("SliderStrength").GetComponent<Slider>();
@@ -120,6 +143,26 @@ public class UI : FSystem {
 		sourceRadiusSlider = GameObject.Find("SliderRadius").GetComponent<Slider>();
 		sourceRadiusSlider.onValueChanged.AddListener((float value) => OnSliderRadiusChanged (value));
 		sourceRadiusText = GameObject.Find("TextRadius").GetComponent<Text>();
+
+		// === Add & Delete panel
+		sourceAddDelPanel = GameObject.Find("SourcesPanel2").GetComponent<CanvasGroup>();
+		addButton = GameObject.Find ("AddButton").GetComponent<Button> ();
+		addButton.onClick.AddListener (() => OnAddButtonClicked ()); 
+		deleteButton = GameObject.Find ("DeleteButton").GetComponent<Button> ();
+		deleteButton.onClick.AddListener (() => OnDeleteButtonClicked ());
+		fieldLeft = GameObject.Find("SourcesLeft").GetComponent<Text>();
+		fieldLeft.text = ""+GameObject.Find ("SourcesLeft").GetComponent<FieldsCounter> ().fieldsLeft;
+	}
+
+	// === Hide Toggle
+	protected void OnHideToggled(bool value){
+		if (value) {
+			mainCanvasGroup.alpha = 0;
+			mainCanvasGroup.blocksRaycasts = false;
+		} else {
+			mainCanvasGroup.alpha = 1;
+			mainCanvasGroup.blocksRaycasts = true;
+		}
 	}
 
 	// === Timer
@@ -271,6 +314,13 @@ public class UI : FSystem {
 		Field f = source.GetComponent<Field> ();
 		f.A = value;
 
+		// Change look according to field strength
+		if (value > 0) {
+			pa.previousMaterial = circuitMaterial;
+		} else {
+			pa.previousMaterial = lavaMaterial;
+		}
+
 		// New  text
 		sourceStrengthText.text = value +"";
 
@@ -295,6 +345,42 @@ public class UI : FSystem {
 		// Update scene
 		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
 		fd.refresh ();
+	}
+
+	// === Add & Delete Panel
+	protected void OnAddButtonClicked(){
+		FieldsCounter fc = FamilyManager.getFamily (new AllOfComponents (typeof(FieldsCounter))).First ().GetComponent<FieldsCounter> ();
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem ("GameLogic");
+
+		// field left
+		if (fc.fieldsLeft > 0  && gl.state==GameLogic.STATES.SETUP) {
+			GameObject s = GameObject.Instantiate (fc.source);
+			s.name = s.name + fc.fieldsLeft;
+			GameObjectManager.bind (s);
+
+			// update UI
+			fc.fieldsLeft--;
+			fieldLeft.text = "" + fc.fieldsLeft;
+		}
+	}
+
+	protected void OnDeleteButtonClicked(){
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		FieldsCounter fc = FamilyManager.getFamily (new AllOfComponents (typeof(FieldsCounter))).First ().GetComponent<FieldsCounter> ();
+
+		// a field is indeed selected
+		if (pa.previousGameObject!=null && editableSourcesFamily.contains(pa.previousGameObject.GetInstanceID())) {
+			// we delete it
+			GameObjectManager.unbind (pa.previousGameObject);
+			GameObject.Destroy (pa.previousGameObject);
+			pa.previousGameObject = null;
+			pa.previousMaterial = null;
+			Hide (sourcesInformationsPanel);
+
+			// update UI
+			fc.fieldsLeft++;
+			fieldLeft.text = "" + fc.fieldsLeft;
+		}
 	}
 
 	// === General
