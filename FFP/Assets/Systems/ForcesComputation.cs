@@ -56,15 +56,7 @@ public class ForcesComputation : FSystem {
 		Mass mass = ship.GetComponent<Mass> ();
 
 		// Compute forces to be applied
-		Vector3 forces = Vector3.zero;
-		foreach(GameObject s in sourcesFamily){
-			// Get associated field and position for each source
-			Field f = s.GetComponent<Field> ();
-			Position position = s.GetComponent<Position> ();
-			Vector3 p = position.pos;
-			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/Constants.FORCES_ROUNDING;
-			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, shipPosition.pos.x * hmWidth, shipPosition.pos.y * hmHeight))/Constants.FORCES_ROUNDING;
-		}
+		Vector3 forces = computeForceAt(shipPosition.pos.x,shipPosition.pos.y);
 
 		// Apply force to the ship using Euler and rotate it in the direciton of the speed
 		m.acceleration = (forces/mass.mass);
@@ -85,6 +77,26 @@ public class ForcesComputation : FSystem {
 		m.speed =  new Vector3 (Mathf.Round (1000f * r.velocity.x) / 1000f, Mathf.Round (1000f * r.velocity.z) / 1000f, Mathf.Round (1000f * r.velocity.y) / 1000f);
 		m.acceleration = forces;
 		*/
+	}
+
+	public Vector3 computeForceAt(float x, float y){
+		// Get Terrain heightMap and place it
+		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
+		int hmWidth = terr.terrainData.heightmapWidth;
+		int hmHeight = terr.terrainData.heightmapHeight;
+		Vector3 terrDims = terr.terrainData.size;
+
+		Vector3 forces = Vector3.zero;
+		foreach(GameObject s in sourcesFamily){
+			// Get associated field and position for each source
+			Field f = s.GetComponent<Field> ();
+			Position position = s.GetComponent<Position> ();
+			Vector3 p = position.pos;
+			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
+			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
+		}
+
+		return forces;
 	}
 
 	public static float gaussianDerivativeX(float x0, float y0, float sigx, float sigy, float A, float x, float y){

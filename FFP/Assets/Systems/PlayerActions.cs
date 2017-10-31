@@ -95,6 +95,7 @@ public class PlayerActions : FSystem {
 				GameObject go = GameObject.Find (hit.collider.name);
 				isSourceSelected (go);
 				isShipSelected (go);
+				isTerrinSelected (go,hit);
 			}
 		}
 
@@ -119,6 +120,10 @@ public class PlayerActions : FSystem {
 				// Refresh forces
 				ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem ("ForcesDisplay");
 				fd.refresh ();
+
+				// Refresh UI
+				UI ui = (UI)SystemsManager.GetFSystem("UI");
+				ui.UpdateSourcesInformations (previousGameObject);
 			}
 		}	
 	}
@@ -171,6 +176,20 @@ public class PlayerActions : FSystem {
 		} 
 
 		ui.Hide (ui.shipSpeedPanel);
+		return false;
+	}
+
+	protected bool isTerrinSelected(GameObject go, RaycastHit hit){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+
+		if(PPlanFamily.contains(go.GetInstanceID())){
+			ui.UpdatePointInformations (hit.point);
+			ui.Show (ui.pointPanel);
+
+			return true;
+		}
+
+		ui.Hide (ui.pointPanel);
 		return false;
 	}
 

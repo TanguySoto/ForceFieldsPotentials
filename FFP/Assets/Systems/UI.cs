@@ -18,6 +18,7 @@ public class UI : FSystem {
 
 	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 	private Family editableSourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position), typeof(Editable)));
+	private Family PPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
 
 	// === Main panel
 	CanvasGroup mainCanvasGroup;
@@ -57,12 +58,14 @@ public class UI : FSystem {
 	// === LaunchButton
 	public Button launchButton;
 
-	// === Ship speed
+	// === Ship speed and position
 	public CanvasGroup shipSpeedPanel;
 	private Slider 	speedIntensitySlider;
 	private Text 	speedIntensityText;
 	private Slider 	speedAngleSlider;
 	private Text 	speedAngleText;
+	private Text 	shipX;
+	private Text 	shipY;
 
 	// === Sources informations
 	protected Material lavaMaterial;
@@ -73,6 +76,15 @@ public class UI : FSystem {
 	private Text 	sourceStrengthText;
 	private Slider 	sourceRadiusSlider;
 	private Text 	sourceRadiusText;
+	private Text 	sourceX;
+	private Text	sourceY;
+
+	// === Point panel
+	public CanvasGroup pointPanel;
+	private Text pointX;
+	private Text pointY;
+	private Text fPointX;
+	private Text fPointY;
 
 	// === Sources add/del panel
 	public CanvasGroup sourceAddDelPanel;
@@ -122,7 +134,7 @@ public class UI : FSystem {
 		launchButton = GameObject.Find ("ButtonLaunch").GetComponent<Button> ();
 		launchButton.onClick.AddListener (() => OnLaunchButtonClicked ());
 
-		// === Ship speed
+		// === Ship speed and position
 		shipSpeedPanel = GameObject.Find("ShipPanel").GetComponent<CanvasGroup>();
 		Hide (shipSpeedPanel);
 		speedIntensitySlider = GameObject.Find("SliderSpeed").GetComponent<Slider>();
@@ -131,6 +143,8 @@ public class UI : FSystem {
 		speedAngleSlider = GameObject.Find("SliderAngle").GetComponent<Slider>();
 		speedAngleSlider.onValueChanged.AddListener((float value) => OnSliderAngleChanged (value));
 		speedAngleText = GameObject.Find("TextAngle").GetComponent<Text>();
+		shipX = GameObject.Find("ShipX").GetComponent<Text>();
+		shipY = GameObject.Find("ShipY").GetComponent<Text>();
 
 		// === Source Informations
 		lavaMaterial = Resources.Load("Materials/LavaMaterial",typeof(Material)) as Material;
@@ -143,6 +157,17 @@ public class UI : FSystem {
 		sourceRadiusSlider = GameObject.Find("SliderRadius").GetComponent<Slider>();
 		sourceRadiusSlider.onValueChanged.AddListener((float value) => OnSliderRadiusChanged (value));
 		sourceRadiusText = GameObject.Find("TextRadius").GetComponent<Text>();
+		sourceX = GameObject.Find ("SourceX").GetComponent<Text> ();
+		sourceY = GameObject.Find ("SourceY").GetComponent<Text> ();
+
+		// === Point panel
+		pointPanel = GameObject.Find("PointPanel").GetComponent<CanvasGroup>();
+		Hide (pointPanel);
+		pointX = GameObject.Find("PointX").GetComponent<Text>();
+		pointY = GameObject.Find("PointY").GetComponent<Text>();
+		fPointX = GameObject.Find("FPointX").GetComponent<Text>();
+		fPointY = GameObject.Find("FPointY").GetComponent<Text>();
+
 
 		// === Add & Delete panel
 		sourceAddDelPanel = GameObject.Find("SourcesPanel2").GetComponent<CanvasGroup>();
@@ -249,9 +274,12 @@ public class UI : FSystem {
 
 	// === Ship speed
 	public void UpdateShipInformations(GameObject ship){
+		Position p = ship.GetComponent<Position> ();
 		Movement m = ship.GetComponent<Movement> ();
-		speedIntensityText.text = (Mathf.Round(100f*m.speed.magnitude)/100f) + " m/s";
+		speedIntensityText.text = m.speed.magnitude.ToString("F2") + " m/s";
 		speedAngleText.text = ((int)(Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg)) + "°";
+		shipX.text = p.pos.x.ToString ("F3") + " m";
+		shipY.text = p.pos.y.ToString ("F3") + " m";
 
 		if (ship.GetComponent<Editable> () == null) {
 			speedAngleSlider.enabled = false;
@@ -292,9 +320,12 @@ public class UI : FSystem {
 
 	// === Source informations
 	public void UpdateSourcesInformations(GameObject sources){
+		Position p = sources.GetComponent<Position> ();
 		Field f = sources.GetComponent<Field> ();
 		sourceStrengthSlider.value = (int)(f.A*100);
 		sourceRadiusSlider.value = (int)(f.sigx*100);
+		sourceX.text = p.pos.x.ToString ("F3") + " m";
+		sourceY.text = p.pos.y.ToString ("F3") + " m";
 
 		if (sources.GetComponent<Editable> () == null) {
 			sourceStrengthSlider.enabled = false;
@@ -340,11 +371,29 @@ public class UI : FSystem {
 		f.sigy = value;
 
 		// New Text
-		sourceRadiusText.text = value +"";
+		sourceRadiusText.text = value +" m";
 
 		// Update scene
 		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
 		fd.refresh ();
+	}
+
+	// === Point informations
+	public void UpdatePointInformations(Vector3 point){
+		TerrainData td = PPlanFamily.First ().GetComponent<Terrain> ().terrainData;
+
+		// update coordinates
+		float x = point.x/td.size.x;
+		pointX.text = x.ToString ("F3")+" m";
+		float y = point.z/td.size.z;
+		pointY.text = y.ToString ("F3")+" m";
+
+		// update forces
+		ForcesComputation fc = (ForcesComputation)SystemsManager.GetFSystem("ForcesComputation");
+		Vector3 f = fc.computeForceAt (x, y);
+		fPointX.text = f.x.ToString ("F3")+" kg.m/s2";
+		fPointY.text = f.y.ToString ("F3")+" kg.m/s2";
+
 	}
 
 	// === Add & Delete Panel
