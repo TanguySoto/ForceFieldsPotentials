@@ -76,25 +76,25 @@
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>
  <Reference Include="CollisionManager">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/CollisionManager.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/CollisionManager.dll</HintPath>
  </Reference>
  <Reference Include="FYFY">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/FYFY.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/FYFY.dll</HintPath>
  </Reference>
  <Reference Include="FYFY_Inspector">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/FYFY_Inspector.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/FYFY_Inspector.dll</HintPath>
  </Reference>
  <Reference Include="Monitoring">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/Monitoring.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/Monitoring.dll</HintPath>
  </Reference>
  <Reference Include="Monitoring_Inspector">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/Monitoring_Inspector.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/Monitoring_Inspector.dll</HintPath>
  </Reference>
  <Reference Include="PointerManager">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/PointerManager.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/PointerManager.dll</HintPath>
  </Reference>
  <Reference Include="TriggerManager">
- <HintPath>E:/Documents/Education/Jussieu_UPMC/projetISG/FFP/Assets/Libraries/TriggerManager.dll</HintPath>
+ <HintPath>C:/Users/guillaume/Documents/UPMC/ANDROIDE/ISG/projetISG/FFP/Assets/Libraries/TriggerManager.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
