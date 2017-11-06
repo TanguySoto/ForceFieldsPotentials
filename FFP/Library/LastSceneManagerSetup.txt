@@ -1,4 +1,28 @@
 sceneSetups:
-- path: Assets/Scenes/level_2.unity
+- path: Assets/Scenes/Scene_test/MenuScene.unity
   isLoaded: 1
   isActive: 1
+- path: Assets/Scenes/Scene_test/Scene_test.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_1.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_2.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_3.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_4.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_5.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_6.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/Scene_test/level_7.unity
+  isLoaded: 0
+  isActive: 0
