@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 
 /*
@@ -11,11 +10,7 @@ using System.Collections;
  * Tanguy SOTO
  */
 
-public class Game : MonoBehaviour {
-
-	public int noLevels = 1;
-	public int unlockedLevels = 1;
-	public int totalLevels = 7;
+public class ButtonMenu : MonoBehaviour {
 
 	public GameObject buttonLevelPrefab;
 

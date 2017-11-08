@@ -55,6 +55,12 @@ public class UI : FSystem {
 	private int fpsBufferIndex = 0;
 	private Text FPSLabel, highestFPSLabel, lowestFPSLabel;
 
+	// === MenuButton
+	public Button menuButton;
+
+	// === NextLevelButton
+	public Button nextLevelButton;
+
 	// === LaunchButton
 	public Button launchButton;
 
@@ -112,7 +118,7 @@ public class UI : FSystem {
 	protected override void onProcess(int familiesUpdateCount) {
 		UpdateFPS ();
 		UpdateTimers ();
-
+		UpdateNextLevelButton ();
 	}
 
 	// ==== METHODS ====
@@ -132,6 +138,15 @@ public class UI : FSystem {
 		FPSLabel = GameObject.Find("FPSLabel").GetComponent<Text>();
 		lowestFPSLabel = GameObject.Find("LowestFPSLabel").GetComponent<Text>();
 		fpsBuffer = new int[frameRange];
+
+		// === Menu button
+		menuButton = GameObject.Find ("MenuButton").GetComponent<Button> ();
+		menuButton.onClick.AddListener (() => OnMenuButtonClicked ());
+
+		// === Next level button
+		nextLevelButton = GameObject.Find ("NextLevelButton").GetComponent<Button> ();
+		nextLevelButton.onClick.AddListener (() => OnNextLevelButtonClicked ());
+		nextLevelButton.interactable = false;
 
 		// === Launch button
 		launchButton = GameObject.Find ("ButtonLaunch").GetComponent<Button> ();
@@ -249,10 +264,55 @@ public class UI : FSystem {
 		FPSLabel.text = stringsFrom00To99[Mathf.Clamp(FPS, 0, 99)];
 		lowestFPSLabel.text = stringsFrom00To99[Mathf.Clamp(lowestFPS, 0, 99)];
 	}
-		
+
+
+	// === Showing Next level button and updating number of unlocked levels
+	protected void UpdateNextLevelButton(){
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		GameObject gameInfos = GameObject.Find("GameInformations");
+		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
+
+		// if level is won and not the last one, activate next level button
+		if (gl.state == GameLogic.STATES.WON && levelInfos.noLevel < levelInfos.totalLevels && nextLevelButton.interactable == false) {
+			if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
+				levelInfos.unlockedLevels++;
+				Debug.Log ("Level "+levelInfos.unlockedLevels+" unlocked!");
+			}
+			nextLevelButton.interactable = true;
+		}
+
+		// if next level is already unlocked, and next level button not activated 
+		if (levelInfos.noLevel < levelInfos.unlockedLevels && nextLevelButton.interactable == false) {
+			nextLevelButton.interactable = true;
+		}
+	}
+
+
+	// === Next level button
+	protected void OnNextLevelButtonClicked(){
+		GameObject gameInfos = GameObject.Find("GameInformations");
+		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
+		if (levelInfos.noLevel < levelInfos.totalLevels) {
+			levelInfos.noLevel++;
+			Debug.Log ("Go to level "+levelInfos.noLevel);
+			SystemsManager.ResetFSystems ();
+			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
+		}
+	}
+
+
+	// === Menu button
+	protected void OnMenuButtonClicked(){
+		SystemsManager.ResetFSystems ();
+		GameObjectManager.loadScene ("MenuScene");
+	}
+
+
 	// === Launch button
 	protected void OnLaunchButtonClicked(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		GameObject gameInfos = GameObject.Find("GameInformations");
+		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
 
 		switch (gl.state) {
 		case GameLogic.STATES.SETUP:
@@ -269,11 +329,11 @@ public class UI : FSystem {
 			break;
 		case GameLogic.STATES.WON:
 			SystemsManager.ResetFSystems ();
-			GameObjectManager.loadScene ("scene_test");
+			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
 			break;
 		case GameLogic.STATES.LOST:
 			SystemsManager.ResetFSystems ();
-			GameObjectManager.loadScene ("scene_test");
+			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
 			break;
 		default:
 			break;
