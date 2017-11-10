@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using FYFY;
 
 /*
@@ -81,9 +82,8 @@ public class PlayerActions : FSystem {
 			RaycastHit hit = new RaycastHit();
 			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 
-			// touched something
-			if (Physics.Raycast (ray, out hit)) {
-
+			// touched something and was not UI
+			if (Physics.Raycast(ray, out hit) && !EventSystem.current.IsPointerOverGameObject()) {
 				// unselect previous object
 				if (previousGameObject != null) {
 					previousGameObject.GetComponent<Renderer> ().material = previousMaterial;
@@ -93,6 +93,7 @@ public class PlayerActions : FSystem {
 				
 				// select now object if it match our criteria
 				GameObject go = GameObject.Find (hit.collider.name);
+				Debug.Log (hit.collider.name);
 				isSourceSelected (go);
 				isShipSelected (go);
 				isTerrinSelected (go,hit);
@@ -171,6 +172,7 @@ public class PlayerActions : FSystem {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
 			}
 
+			ui.UpdateShipInformations (go);
 			ui.Show (ui.shipSpeedPanel);
 			return true;
 		} 

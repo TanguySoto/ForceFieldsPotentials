@@ -350,11 +350,9 @@ public class UI : FSystem {
 		shipY.text = p.pos.y.ToString ("F3") + " m";
 
 		if (ship.GetComponent<Editable> () == null) {
-			speedAngleSlider.enabled = false;
-			speedIntensitySlider.enabled = false;
+			shipSpeedPanel.interactable = false;
 		} else {
-			speedAngleSlider.enabled = true;
-			speedIntensitySlider.enabled = true;
+			shipSpeedPanel.interactable = true;
 		}
 	}
 
@@ -396,11 +394,9 @@ public class UI : FSystem {
 		sourceY.text = p.pos.y.ToString ("F3") + " m";
 
 		if (sources.GetComponent<Editable> () == null) {
-			sourceStrengthSlider.enabled = false;
-			sourceRadiusSlider.enabled = false;
+			sourcesInformationsPanel.interactable = false;
 		} else {
-			sourceStrengthSlider.enabled = true;
-			sourceRadiusSlider.enabled = true;
+			sourcesInformationsPanel.interactable = false;
 		}
 	}
 
@@ -509,14 +505,5 @@ public class UI : FSystem {
 	public void Show(CanvasGroup cg){
 		cg.alpha = 1;
 		cg.blocksRaycasts = true;
-	}
-
-	public void HideAllPanels(){
-		// Ship
-		shipSpeedPanel.alpha = 0;
-		shipSpeedPanel.blocksRaycasts = false;
-		// Sources
-		sourcesInformationsPanel.alpha = 0;
-		sourcesInformationsPanel.blocksRaycasts = false;
 	}
 }
