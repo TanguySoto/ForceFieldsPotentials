@@ -89,8 +89,8 @@ public class ForcesComputation : FSystem {
 			Field f = s.GetComponent<Field> ();
 			Position position = s.GetComponent<Position> ();
 			Vector3 p = position.pos;
-			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
-			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx*hmWidth, f.sigy*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
+			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx/2f*hmWidth, f.sigy/2f*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
+			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx/2f*hmWidth, f.sigy/2f*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
 		}
 
 		return forces;

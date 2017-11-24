@@ -93,7 +93,6 @@ public class PlayerActions : FSystem {
 				
 				// select now object if it match our criteria
 				GameObject go = GameObject.Find (hit.collider.name);
-				Debug.Log (hit.collider.name);
 				isSourceSelected (go);
 				isShipSelected (go);
 				isTerrinSelected (go,hit);

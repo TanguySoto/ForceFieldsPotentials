@@ -27,8 +27,8 @@ public class UI : FSystem {
 	private Toggle hideInterface;
 
 	// === Timers
-	private int totalTime = 0;
-	private int travelTime = 0;
+	private float totalTime = 0;
+	private float travelTime = 0;
 
 	private Text totalTimeText;
 	private Text travelTimeText;
@@ -188,7 +188,7 @@ public class UI : FSystem {
 
 
 		// === Add & Delete panel
-		sourceAddDelPanel = GameObject.Find("SourcesPanel2").GetComponent<CanvasGroup>();
+		sourceAddDelPanel = GameObject.Find("AddSourcesPanel").GetComponent<CanvasGroup>();
 		addButton = GameObject.Find ("AddButton").GetComponent<Button> ();
 		addButton.onClick.AddListener (() => OnAddButtonClicked ()); 
 		deleteButton = GameObject.Find ("DeleteButton").GetComponent<Button> ();
@@ -219,18 +219,21 @@ public class UI : FSystem {
 
 		// update timers
 		if (gl.state != GameLogic.STATES.LOST && gl.state != GameLogic.STATES.WON) {
-			totalTime += (int)Mathf.Round (100f * Time.deltaTime);
+			totalTime += Time.deltaTime;
 		}
 		if (gl.state==GameLogic.STATES.PLAYING) {
-			travelTime += (int)Mathf.Round (100f * Time.deltaTime);
+			travelTime += Time.deltaTime;
 		}
 
 		// update UI
-		int seconds = totalTime/100;
-		int centiemes = totalTime % 100;
+		int roundedTotalTime = (int)Mathf.Round(100f * totalTime);
+		int seconds = roundedTotalTime/100;
+		int centiemes = roundedTotalTime % 100;
 		totalTimeText.text = string.Format ("{0:0}.{1:00} s", seconds, centiemes);
-		seconds = travelTime / 100;
-		centiemes = travelTime % 100;
+
+		int roundedTravelTime = (int)Mathf.Round(100f * travelTime);
+		seconds = roundedTravelTime / 100;
+		centiemes = roundedTravelTime % 100;
 		travelTimeText.text = string.Format ("{0:0}.{1:00} s", seconds, centiemes);
 	}
 
@@ -267,7 +270,7 @@ public class UI : FSystem {
 
 
 	// === Showing Next level button and updating number of unlocked levels
-	protected void UpdateNextLevelButton(){
+	public void UpdateNextLevelButton(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		GameObject gameInfos = GameObject.Find("GameInformations");
 		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
@@ -396,7 +399,7 @@ public class UI : FSystem {
 		if (sources.GetComponent<Editable> () == null) {
 			sourcesInformationsPanel.interactable = false;
 		} else {
-			sourcesInformationsPanel.interactable = false;
+			sourcesInformationsPanel.interactable = true;
 		}
 	}
 
@@ -409,14 +412,18 @@ public class UI : FSystem {
 		Field f = source.GetComponent<Field> ();
 		f.A = value;
 
-		// Change look according to field strength
-		if (value > 0) {
-			pa.previousMaterial = circuitMaterial;
+		if (f.isUniform) {
+			// TODO
 		} else {
-			pa.previousMaterial = lavaMaterial;
+			// Change look according to field strength
+			if (value > 0) {
+				pa.previousMaterial = circuitMaterial;
+			} else {
+				pa.previousMaterial = lavaMaterial;
+			}
 		}
-
-		// New  text
+			
+		// New text
 		sourceStrengthText.text = value +"";
 
 		// Update scene

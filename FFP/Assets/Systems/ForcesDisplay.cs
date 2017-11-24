@@ -82,7 +82,11 @@ public class ForcesDisplay : FSystem {
 			// Apply field to Terrain heights
 			for (int x = 0; x < hmWidth; x++) {
 				for (int y = 0; y < hmHeight; y++) {
-					level [y,x] += gaussian(p.x*hmWidth,p.y*hmHeight,f.sigx*hmWidth,f.sigy*hmHeight,f.A/2f,x,y);
+					if (f.isUniform) {
+						level [y, x] += plan (p.x * hmWidth, p.y * hmHeight, f.sigx * hmWidth, f.sigy * hmHeight, f.b, f.c, x, y);
+					} else {
+						level [y, x] += gaussian (p.x * hmWidth, p.y * hmHeight, f.sigx/2f * hmWidth, f.sigy/2f * hmHeight, f.A / 2f, x, y);
+					}
 				}
 			}
 		}
@@ -168,9 +172,13 @@ public class ForcesDisplay : FSystem {
 
 			// Scale it to the right dimension
 			float scale = Constants.SOURCES_SIZE_SCALING;
+			if (field.isUniform) {
+				dims.height = 0.33f;
+			} else {
+				dims.height = 1;
+			}
 			dims.width = field.sigx * scale;
 			dims.length = field.sigy * scale;
-			dims.height = 1;
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
 		}
 	}
@@ -185,5 +193,17 @@ public class ForcesDisplay : FSystem {
 
 	protected float gaussian(float x0, float y0, float sigx, float sigy, float A, float x, float y){
 		return A * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
+	}
+
+	protected float plan(float x0, float y0, float sizeX, float sizeY, float b, float c, float x, float y){
+		float planX = x0 - x;
+		float planY = y0 - y;
+		float offset = Mathf.Abs (b * sizeX) + Mathf.Abs (c * sizeY);
+
+		if (Mathf.Abs(planX) <= sizeX && Mathf.Abs(planY) <= sizeY) {
+			return b * planX + c * planY + offset;
+		}
+
+		return 0;
 	}
 }

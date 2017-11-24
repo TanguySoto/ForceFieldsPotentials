@@ -10,9 +10,17 @@
  */
 
 public class Field : MonoBehaviour {
+	
+	public float sigx = 0.1f;
+	public float sigy = 0.1f;
 
+	// === Gaussian parameters
 	public float A = 0.2f;
 
-	public float sigx = 0.05f;
-	public float sigy = 0.05f;
+	// === Plan parameters : z = bx + cy
+	public bool isUniform = false;
+
+	public float b = 0.5f;
+	public float c = 0f;
+
 }
