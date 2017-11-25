@@ -73,6 +73,8 @@ public class ForcesDisplay : FSystem {
 		}
 
 		// For each sources
+		float max = level [0, 0];
+		float min = level [0, 0];
 		foreach(GameObject s in sourcesFamily){
 			// Get associated field and position
 			Field f = s.GetComponent<Field>();
@@ -87,12 +89,27 @@ public class ForcesDisplay : FSystem {
 					} else {
 						level [y, x] += gaussian (p.x * hmWidth, p.y * hmHeight, f.sigx/2f * hmWidth, f.sigy/2f * hmHeight, f.A / 2f, x, y);
 					}
+					max = Mathf.Max(max,level[y,x]);
+					min = Mathf.Min(min,level[y,x]);
 				}
 			}
+
+			// Normalize if necessary
+			for (int x = 0; x < hmWidth; x++) {
+				for (int y = 0; y < hmHeight; y++) {
+					if (min < 0) {
+						level [y, x] += (Mathf.Abs (min));
+					}
+					if (max > 1) {
+						level [y, x] -= (max - 1);
+					}
+				}
+			}
+		
 		}
 
 		// Set new Terrain heights
-		terr.terrainData.SetHeights (0, 0, level);		
+		terr.terrainData.SetHeights (0, 0, level);
 	}
 
 	/**
@@ -174,11 +191,14 @@ public class ForcesDisplay : FSystem {
 			float scale = Constants.SOURCES_SIZE_SCALING;
 			if (field.isUniform) {
 				dims.height = 0.33f;
+				dims.width = field.sigx * scale * 2;
+				dims.length = field.sigy * scale * 	2;
 			} else {
 				dims.height = 1;
+				dims.width = field.sigx * scale;
+				dims.length = field.sigy * scale;
 			}
-			dims.width = field.sigx * scale;
-			dims.length = field.sigy * scale;
+
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
 		}
 	}

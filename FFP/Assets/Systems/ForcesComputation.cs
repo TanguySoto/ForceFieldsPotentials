@@ -89,8 +89,14 @@ public class ForcesComputation : FSystem {
 			Field f = s.GetComponent<Field> ();
 			Position position = s.GetComponent<Position> ();
 			Vector3 p = position.pos;
-			forces.x += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x*hmWidth, p.y*hmHeight, f.sigx/2f*hmWidth, f.sigy/2f*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
-			forces.y += Mathf.Round(Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x*hmWidth, p.y*hmHeight, f.sigx/2f*hmWidth, f.sigy/2f*hmHeight, f.A/2f, x * hmWidth, y * hmHeight))/Constants.FORCES_ROUNDING;
+			// Compute force
+			if (f.isUniform) {
+				forces.x += Mathf.Round (Constants.FORCES_ROUNDING *planDerivativeX(p.x * hmWidth, p.y * hmHeight, f.sigx * hmWidth, f.sigy * hmHeight, f.b, f.c, x * hmWidth, y*hmHeight)) / Constants.FORCES_ROUNDING;
+				forces.y += Mathf.Round (Constants.FORCES_ROUNDING * planDerivativeY (p.x * hmWidth, p.y * hmHeight, f.sigx * hmWidth, f.sigy * hmHeight, f.b, f.c,x * hmWidth, y*hmHeight)) / Constants.FORCES_ROUNDING;
+			} else {
+				forces.x += Mathf.Round (Constants.FORCES_ROUNDING * gaussianDerivativeX (p.x * hmWidth, p.y * hmHeight, f.sigx / 2f * hmWidth, f.sigy / 2f * hmHeight, f.A / 2f, x * hmWidth, y * hmHeight)) / Constants.FORCES_ROUNDING;
+				forces.y += Mathf.Round (Constants.FORCES_ROUNDING * gaussianDerivativeY (p.x * hmWidth, p.y * hmHeight, f.sigx / 2f * hmWidth, f.sigy / 2f * hmHeight, f.A / 2f, x * hmWidth, y * hmHeight)) / Constants.FORCES_ROUNDING;
+			}
 		}
 
 		return forces;
@@ -102,5 +108,27 @@ public class ForcesComputation : FSystem {
 
 	public static float gaussianDerivativeY(float x0, float y0, float sigx, float sigy, float A, float x, float y){
 		return Constants.FORCES_SCALING *A * ((y-y0)/(sigy*sigy)) * Mathf.Exp (-((((x - x0)*(x - x0)) / (2 * sigx*sigx)) + (((y - y0)*(y - y0)) / (2 * sigy*sigy))));
+	}
+
+	protected float planDerivativeX(float x0, float y0, float sizeX, float sizeY, float b, float c, float x, float y){
+		float planX = x0 - x;
+		float planY = y0 - y;
+
+		if (Mathf.Abs(planX) < sizeX && Mathf.Abs(planY) < sizeY) {
+			return b * Constants.FORCES_SCALING*2;
+		}
+
+		return 0;
+	}
+
+	protected float planDerivativeY(float x0, float y0, float sizeX, float sizeY, float b, float c, float x, float y){
+		float planX = x0 - x;
+		float planY = y0 - y;
+
+		if (Mathf.Abs(planX) <= sizeX && Mathf.Abs(planY) <= sizeY) {
+			return c * Constants.FORCES_SCALING *2;
+		}
+
+		return 0;
 	}
 }

@@ -122,8 +122,12 @@ public class PlayerActions : FSystem {
 				fd.refresh ();
 
 				// Refresh UI
-				UI ui = (UI)SystemsManager.GetFSystem("UI");
-				ui.UpdateSourcesInformations (previousGameObject);
+				UI ui = (UI)SystemsManager.GetFSystem ("UI");
+				if (previousGameObject.GetComponent<Field> ().isUniform) {
+					ui.UpdateUniSourcesInformations (previousGameObject);
+				} else {
+					ui.UpdateSourcesInformations (previousGameObject);
+				}
 			}
 		}	
 	}
@@ -147,12 +151,20 @@ public class PlayerActions : FSystem {
 				offset = go.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z));
 			}
 
-			ui.UpdateSourcesInformations (go);
-			ui.Show (ui.sourcesInformationsPanel);
+			if (go.GetComponent<Field> ().isUniform) {
+				ui.UpdateUniSourcesInformations (go);
+				ui.Show (ui.uniSourcesInformationsPanel);
+				ui.Hide (ui.sourcesInformationsPanel);
+			} else {
+				ui.UpdateSourcesInformations (go);
+				ui.Show (ui.sourcesInformationsPanel);
+				ui.Hide (ui.uniSourcesInformationsPanel);
+			}
 			return true;
 		}
 			
 		ui.Hide (ui.sourcesInformationsPanel);
+		ui.Hide (ui.uniSourcesInformationsPanel);
 		return false;
 	}
 

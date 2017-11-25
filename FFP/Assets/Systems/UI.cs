@@ -85,6 +85,19 @@ public class UI : FSystem {
 	private Text 	sourceX;
 	private Text	sourceY;
 
+	// === Uniform Sources informations
+	public CanvasGroup uniSourcesInformationsPanel;
+	private Slider 	uniSourceDxSlider;
+	private Text 	uniSourceDxText;
+	private Slider 	uniSourceDySlider;
+	private Text 	uniSourceDyText;
+	private Slider 	uniSourceWidthSlider;
+	private Text 	uniSourceWidthText;
+	private Slider 	uniSourceDepthSlider;
+	private Text 	uniSourceDepthText;
+	private Text 	uniSourceX;
+	private Text	uniSourceY;
+
 	// === Point panel
 	public CanvasGroup pointPanel;
 	private Text pointX;
@@ -177,6 +190,25 @@ public class UI : FSystem {
 		sourceRadiusText = GameObject.Find("TextRadius").GetComponent<Text>();
 		sourceX = GameObject.Find ("SourceX").GetComponent<Text> ();
 		sourceY = GameObject.Find ("SourceY").GetComponent<Text> ();
+
+		// === Uniform Source informations
+		uniSourcesInformationsPanel = GameObject.Find("UniformSourcesPanel").GetComponent<CanvasGroup>();
+		Hide (uniSourcesInformationsPanel);
+		uniSourceDxSlider = GameObject.Find ("SliderDx").GetComponent<Slider> ();
+		uniSourceDxSlider.onValueChanged.AddListener ((float value) => OnSliderDxChanged (value));
+		uniSourceDxText = GameObject.Find("TextDx").GetComponent<Text>();
+		uniSourceDySlider = GameObject.Find ("SliderDy").GetComponent<Slider> ();
+		uniSourceDySlider.onValueChanged.AddListener ((float value) => OnSliderDyChanged (value));
+		uniSourceDyText = GameObject.Find("TextDy").GetComponent<Text>();
+		uniSourceWidthSlider = GameObject.Find ("SliderWidth").GetComponent<Slider> ();
+		uniSourceWidthSlider.onValueChanged.AddListener ((float value) => OnSliderWidthChanged (value));
+		uniSourceWidthText = GameObject.Find("TextWidth").GetComponent<Text>();
+		uniSourceDepthSlider = GameObject.Find ("SliderDepth").GetComponent<Slider> ();
+		uniSourceDepthSlider.onValueChanged.AddListener ((float value) => OnSliderDepthChanged (value));
+		uniSourceDepthText = GameObject.Find("TextDepth").GetComponent<Text>();
+
+		uniSourceX = GameObject.Find("SourceUniX").GetComponent<Text>();
+		uniSourceY = GameObject.Find("SourceUniY").GetComponent<Text>();
 
 		// === Point panel
 		pointPanel = GameObject.Find("PointPanel").GetComponent<CanvasGroup>();
@@ -412,15 +444,11 @@ public class UI : FSystem {
 		Field f = source.GetComponent<Field> ();
 		f.A = value;
 
-		if (f.isUniform) {
-			// TODO
+		// Change look according to field strength
+		if (value > 0) {
+			pa.previousMaterial = circuitMaterial;
 		} else {
-			// Change look according to field strength
-			if (value > 0) {
-				pa.previousMaterial = circuitMaterial;
-			} else {
-				pa.previousMaterial = lavaMaterial;
-			}
+			pa.previousMaterial = lavaMaterial;
 		}
 			
 		// New text
@@ -443,6 +471,91 @@ public class UI : FSystem {
 
 		// New Text
 		sourceRadiusText.text = value +" m";
+
+		// Update scene
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
+	}
+
+	// === Uniform source informations
+	public void UpdateUniSourcesInformations(GameObject sources){
+		Position p = sources.GetComponent<Position> ();
+		Field f = sources.GetComponent<Field> ();
+		uniSourceDxSlider.value = (int)Mathf.Round(f.b*5000);
+		uniSourceDySlider.value = (int)Mathf.Round(f.c*5000);
+		uniSourceWidthSlider.value = (int)(f.sigx*100);
+		uniSourceDepthSlider.value = (int)(f.sigy*100);
+		uniSourceX.text = p.pos.x.ToString ("F3") + " m";
+		uniSourceY.text = p.pos.y.ToString ("F3") + " m";
+
+		if (sources.GetComponent<Editable> () == null) {
+			uniSourcesInformationsPanel.interactable = false;
+		} else {
+			uniSourcesInformationsPanel.interactable = true;
+		}
+	}
+
+	protected void OnSliderWidthChanged(float value){
+		value = value/100f;
+
+		// New value
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
+		Field f = source.GetComponent<Field> ();
+		f.sigx = value;
+		// New Text
+		uniSourceWidthText.text = value +" m";
+
+		// Update scene
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
+	}
+
+	protected void OnSliderDepthChanged(float value){
+		value = value/100f;		
+
+		// New value
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
+		Field f = source.GetComponent<Field> ();
+		f.sigy = value;
+
+		// New Text
+		uniSourceDepthText.text = value +" m";
+
+		// Update scene
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
+	}
+
+	protected void OnSliderDxChanged(float value){
+		value = value/5000f;		
+
+		// New value
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
+		Field f = source.GetComponent<Field> ();
+		f.b = value;
+
+		// New Text
+		uniSourceDxText.text = value*50 +"";
+
+		// Update scene
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");
+		fd.refresh ();
+	}
+
+	protected void OnSliderDyChanged(float value){
+		value = value/5000f;		
+
+		// New value
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
+		GameObject source = pa.previousGameObject;
+		Field f = source.GetComponent<Field> ();
+		f.c = value;
+
+		// New Text
+		uniSourceDyText.text = value*50+"";
 
 		// Update scene
 		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem("ForcesDisplay");

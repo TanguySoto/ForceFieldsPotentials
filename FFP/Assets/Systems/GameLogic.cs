@@ -108,7 +108,11 @@ public class GameLogic : FSystem {
 				GameObjectManager.removeComponent<Editable> (s);
 				if (pa.previousGameObject == s) {
 					s.GetComponent<Renderer> ().material = pa.selectedMaterial;
-					ui.UpdateSourcesInformations (s);
+					if (s.GetComponent<Field> ().isUniform) {
+						ui.UpdateUniSourcesInformations (s);
+					} else {
+						ui.UpdateSourcesInformations (s);
+					}
 				}
 			}
 		}
