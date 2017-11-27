@@ -490,8 +490,8 @@ public class UI : FSystem {
 		Field f = sources.GetComponent<Field> ();
 		uniSourceDxSlider.value = (int)Mathf.Round(f.b*5000);
 		uniSourceDySlider.value = (int)Mathf.Round(f.c*5000);
-		uniSourceWidthSlider.value = (int)(f.sigx*100);
-		uniSourceDepthSlider.value = (int)(f.sigy*100);
+		uniSourceWidthSlider.value = (int)(f.sigx*200);
+		uniSourceDepthSlider.value = (int)(f.sigy*200);
 		uniSourceX.text = p.pos.x.ToString ("F3") + " m";
 		uniSourceY.text = p.pos.y.ToString ("F3") + " m";
 
@@ -509,7 +509,7 @@ public class UI : FSystem {
 		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
 		GameObject source = pa.previousGameObject;
 		Field f = source.GetComponent<Field> ();
-		f.sigx = value;
+		f.sigx = value/2.0f;
 		// New Text
 		uniSourceWidthText.text = value +" m";
 
@@ -525,7 +525,7 @@ public class UI : FSystem {
 		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem("PlayerActions");
 		GameObject source = pa.previousGameObject;
 		Field f = source.GetComponent<Field> ();
-		f.sigy = value;
+		f.sigy = value/2.0f;
 
 		// New Text
 		uniSourceDepthText.text = value +" m";
