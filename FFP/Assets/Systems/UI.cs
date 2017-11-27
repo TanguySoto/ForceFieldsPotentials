@@ -108,8 +108,10 @@ public class UI : FSystem {
 	// === Sources add/del panel
 	public CanvasGroup sourceAddDelPanel;
 	private Button addButton;
-	private Button deleteButton;
+	private Button uniAddButton;
+	public Button deleteButton;
 	private Text fieldLeft;
+	private Text uniFieldLeft;
 
 	// === Minimap
 	private Camera miniMapCamera;
@@ -222,11 +224,16 @@ public class UI : FSystem {
 		// === Add & Delete panel
 		sourceAddDelPanel = GameObject.Find("AddSourcesPanel").GetComponent<CanvasGroup>();
 		addButton = GameObject.Find ("AddButton").GetComponent<Button> ();
-		addButton.onClick.AddListener (() => OnAddButtonClicked ()); 
+		addButton.onClick.AddListener (() => OnAddButtonClicked ());
+		uniAddButton = GameObject.Find ("UniAddButton").GetComponent<Button> ();
+		uniAddButton.onClick.AddListener (() => OnUniAddButtonClicked ()); 
 		deleteButton = GameObject.Find ("DeleteButton").GetComponent<Button> ();
 		deleteButton.onClick.AddListener (() => OnDeleteButtonClicked ());
+		deleteButton.interactable = false;
 		fieldLeft = GameObject.Find("SourcesLeft").GetComponent<Text>();
-		fieldLeft.text = ""+GameObject.Find ("SourcesLeft").GetComponent<FieldsCounter> ().fieldsLeft;
+		fieldLeft.text = ""+GameObject.Find ("AddSourcesPanel").GetComponent<FieldsCounter> ().fieldsLeft;
+		uniFieldLeft = GameObject.Find("UniSourcesLeft").GetComponent<Text>();
+		uniFieldLeft.text = ""+GameObject.Find ("AddSourcesPanel").GetComponent<FieldsCounter> ().uniFieldsLeft;
 
 		// === MiniMap
 		miniMapCamera = GameObject.Find("SecondaryCamera").GetComponent<Camera>();	
@@ -588,12 +595,30 @@ public class UI : FSystem {
 		// field left
 		if (fc.fieldsLeft > 0  && gl.state==GameLogic.STATES.SETUP) {
 			GameObject s = GameObject.Instantiate (fc.source);
-			s.name = s.name + fc.fieldsLeft;
+			s.name = s.name + fc.cpt;
+			fc.cpt++;
 			GameObjectManager.bind (s);
 
 			// update UI
 			fc.fieldsLeft--;
 			fieldLeft.text = "" + fc.fieldsLeft;
+		}
+	}
+
+	protected void OnUniAddButtonClicked(){
+		FieldsCounter fc = FamilyManager.getFamily (new AllOfComponents (typeof(FieldsCounter))).First ().GetComponent<FieldsCounter> ();
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem ("GameLogic");
+
+		// uni field left
+		if (fc.uniFieldsLeft > 0  && gl.state==GameLogic.STATES.SETUP) {
+			GameObject s = GameObject.Instantiate (fc.uniSource);
+			s.name = s.name + fc.cpt;
+			fc.cpt++;
+			GameObjectManager.bind (s);
+
+			// update UI
+			fc.uniFieldsLeft--;
+			uniFieldLeft.text = "" + fc.uniFieldsLeft;
 		}
 	}
 
@@ -603,16 +628,21 @@ public class UI : FSystem {
 
 		// a field is indeed selected
 		if (pa.previousGameObject!=null && editableSourcesFamily.contains(pa.previousGameObject.GetInstanceID())) {
+			// update UI
+			if (pa.previousGameObject.GetComponent<Field> ().isUniform) {
+				fc.uniFieldsLeft++;
+				uniFieldLeft.text = "" + fc.uniFieldsLeft;
+			} else {
+				fc.fieldsLeft++;
+				fieldLeft.text = "" + fc.fieldsLeft;
+			}
+
 			// we delete it
 			GameObjectManager.unbind (pa.previousGameObject);
 			GameObject.Destroy (pa.previousGameObject);
 			pa.previousGameObject = null;
 			pa.previousMaterial = null;
 			Hide (sourcesInformationsPanel);
-
-			// update UI
-			fc.fieldsLeft++;
-			fieldLeft.text = "" + fc.fieldsLeft;
 		}
 	}
 

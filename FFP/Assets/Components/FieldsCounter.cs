@@ -11,6 +11,11 @@ using System.Collections;
  */
 
 public class FieldsCounter : MonoBehaviour {
+	public int cpt = 0;
+
 	public int fieldsLeft = 1;
+	public int uniFieldsLeft = 1;
+
 	public GameObject source;
+	public GameObject uniSource;
 }

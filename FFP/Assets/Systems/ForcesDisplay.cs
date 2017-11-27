@@ -90,22 +90,24 @@ public class ForcesDisplay : FSystem {
 						level [y, x] += gaussian (p.x * hmWidth, p.y * hmHeight, f.sigx/2f * hmWidth, f.sigy/2f * hmHeight, f.A / 2f, x, y);
 					}
 					max = Mathf.Max(max,level[y,x]);
-					min = Mathf.Min(min,level[y,x]);
+					min = Mathf.Min(min,level[y,x]);	
 				}
 			}
+		}
 
-			// Normalize if necessary
-			for (int x = 0; x < hmWidth; x++) {
-				for (int y = 0; y < hmHeight; y++) {
-					if (min < 0) {
-						level [y, x] += (Mathf.Abs (min));
+		// Normalize and keep plan at 0.5f
+		float maxDiff = Mathf.Max(Mathf.Abs(max-0.5f), Mathf.Abs(min-0.5f));
+		for (int x = 0; x < hmWidth; x++) {
+			for (int y = 0; y < hmHeight; y++) {
+				if (maxDiff > 0.5f) {
+					if (level [y, x] > 0.5f) {
+						level [y, x] = 0.5f * (level [y , x] - 0.5f) / (0.5f+maxDiff - 0.5f) + 0.5f; //(b-a)*(myValue-min)/(max-min) + a
 					}
-					if (max > 1) {
-						level [y, x] -= (max - 1);
+					else if (level [y, x] < 0.5f) {
+						level [y, x] = 0.5f - 0.5f * (Mathf.Abs(level[y, x] - 0.5f)) / maxDiff;
 					}
 				}
 			}
-		
 		}
 
 		// Set new Terrain heights

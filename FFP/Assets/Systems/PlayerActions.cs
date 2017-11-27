@@ -160,11 +160,14 @@ public class PlayerActions : FSystem {
 				ui.Show (ui.sourcesInformationsPanel);
 				ui.Hide (ui.uniSourcesInformationsPanel);
 			}
+
+			ui.deleteButton.interactable = go.GetComponent<Editable>()!=null;
 			return true;
 		}
 			
 		ui.Hide (ui.sourcesInformationsPanel);
 		ui.Hide (ui.uniSourcesInformationsPanel);
+		ui.deleteButton.interactable = false;
 		return false;
 	}
 
