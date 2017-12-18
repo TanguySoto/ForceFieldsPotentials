@@ -19,7 +19,6 @@ public class PlayerActions : FSystem {
 
 	// === Camera
 	private Family cameraFamily = FamilyManager.getFamily(new AllOfComponents(typeof(CameraParams)));
-	private bool isCameraInitialized = false;
 	private bool isCameraMovable	 = true;
 	private float xDeg = 0.0f;
 	private float yDeg = 0.0f;
@@ -33,8 +32,7 @@ public class PlayerActions : FSystem {
 	// === Object Selection
 	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
-	private bool isSelectionInitialized = false;
-	private bool canPlayerSelect 		= true;
+	private bool canPlayerSelect 	= true;
 	public Material selectedMaterial;
 	public Material selectedAndEditableMaterial;
 	public GameObject previousGameObject;
@@ -47,32 +45,31 @@ public class PlayerActions : FSystem {
 	private Vector3 offset;
 
 	// ==== LIFECYCLE ====
+
+	public PlayerActions(){
+		SystemsManager.AddFSystem (this);
+		InitCamera ();
+		InitSelection ();
+	}
 	
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isCameraInitialized) {
-			SystemsManager.AddFSystem (this);
-			InitCamera ();
-			isCameraInitialized = true;
-		}
-
-		if (!isSelectionInitialized) {
-			selectedMaterial = Resources.Load("Materials/SelectedMaterial",typeof(Material)) as Material;
-			selectedAndEditableMaterial = Resources.Load("Materials/SelectedAndEditableMaterial",typeof(Material)) as Material;
-			previousGameObject = null;
-			previousMaterial = null;
-			isSelectionInitialized = true;
-		}
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
-		if (isCameraMovable && isCameraInitialized) { CameraUpdate (); }
+		if (isCameraMovable) { CameraUpdate (); }
 		if (canPlayerSelect) { DetectMouseSelection (); }
 	} 
 
 	// ==== METHODS ====
+	protected void InitSelection(){
+		selectedMaterial = Resources.Load("Materials/SelectedMaterial",typeof(Material)) as Material;
+		selectedAndEditableMaterial = Resources.Load("Materials/SelectedAndEditableMaterial",typeof(Material)) as Material;
+		previousGameObject = null;
+		previousMaterial = null;
+	}
 
 	// === Object Selection and Drag & drop
 	protected void DetectMouseSelection(){  

@@ -116,18 +116,17 @@ public class UI : FSystem {
 	// === Minimap
 	private Camera miniMapCamera;
 
-	private bool isUIInit = false;
 
 	// ==== LIFECYCLE ====
+	public UI(){
+		SystemsManager.AddFSystem (this);
+		InitUI ();
+	}
+
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isUIInit) {
-			SystemsManager.AddFSystem (this);
-			InitUI ();
-			isUIInit = true;
-		}
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
@@ -248,8 +247,7 @@ public class UI : FSystem {
 		} else {
 			miniMapCamera.gameObject.SetActive (true);
 			mainCanvasGroup.alpha = 1;
-			mainCanvasGroup.blocksRaycasts = true;
-		}
+			mainCanvasGroup.blocksRaycasts = true;		}
 	}
 
 	// === Timer

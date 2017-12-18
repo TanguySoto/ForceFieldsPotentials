@@ -20,28 +20,22 @@ public class GameLogic : FSystem {
 	private Family sourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 	private Family finishFamily = FamilyManager.getFamily(new AnyOfTags("finish"));
 
-	private bool isShipInit 	= false;
-	private bool isFinishInit 	= false;
-
 	// State of game
 	public enum STATES {SETUP, PLAYING, PAUSED, WON, LOST};
 	public STATES state = STATES.SETUP;
 
 	// ==== LIFECYCLE ====
+
+	public GameLogic(){
+		SystemsManager.AddFSystem (this);
+		InitFinish ();
+		InitShip ();
+	}
 	
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isFinishInit) {
-			SystemsManager.AddFSystem (this);
-			InitFinish ();
-			isFinishInit = true;
-		}
-		if (!isShipInit) {
-			InitShip ();
-			isShipInit = true;
-		}
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {

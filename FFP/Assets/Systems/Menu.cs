@@ -23,7 +23,6 @@ public class Menu : FSystem {
 	private Family gameInfosFamily = FamilyManager.getFamily (new AllOfComponents (typeof(GameInformations))); // Should be only one
 
 
-	private bool isMenuInit = false;
 	private GameObject[] buttonLevels;
 
 
@@ -43,37 +42,20 @@ public class Menu : FSystem {
 
 
 
-
-
-
-
-
 	// ==== LIFECYCLE ====
+	public Menu(){
+		InitMenu ();
+	}
 
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isMenuInit) {
-			InitMenu ();
-			isMenuInit = true;
-		}
 	}
-
-
-
+		
 	protected override void onProcess(int familiesUpdateCount) {
 		UpdateMenu ();
 	}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -105,7 +87,6 @@ public class Menu : FSystem {
 		buttonLevels = new GameObject[totalLevels];
 
 
-
 		// width and height of the level buttons
 		buttonWidth = buttonMenu.buttonLevelPrefab.GetComponent<RectTransform>().sizeDelta.x + 15f; // Size not right between prefab and instantiated object
 		buttonHeight = buttonMenu.buttonLevelPrefab.GetComponent<RectTransform>().sizeDelta.y + 15f;
@@ -123,7 +104,6 @@ public class Menu : FSystem {
 											(buttonHeight + distanceBetweenLines) * (int)((totalLevels-1)/buttonPerLine) + buttonHeight + 2* offsetTopBot) ;
 
 		menu.transform.localPosition += menuCoordinates;
-
 
 
 
@@ -158,15 +138,8 @@ public class Menu : FSystem {
 
 			int index = i+1;
 			newButton.GetComponent<Button>().onClick.AddListener (() => OnLevelButtonClicked (index));
-
-
 		}
-
-
-
-
 	}
-
 
 	public void OnLevelButtonClicked (int index){
 		Debug.Log ("Go to level "+index);
@@ -174,13 +147,6 @@ public class Menu : FSystem {
 		gameInfos.GetComponent<GameInformations> ().noLevel = index;
 		GameObjectManager.loadScene("level_"+index);
 	}
-
-
-
-
-
-
-
 
 
 	// Checks if stretched size is different and adjusts buttons accordingly
@@ -195,10 +161,8 @@ public class Menu : FSystem {
 		GameInformations levelInfos = gameInfos.GetComponent<GameInformations>();
 		int totalLevels = levelInfos.totalLevels;
 
-
 		// Dynamically compute the number of buttons per line
 		buttonPerLine = (int)((menuFrame.GetComponent<RectTransform> ().rect.width - 20f) / (buttonWidth+distanceBetweenButtons));
-
 
 		// Resize the image holding the buttons
 		menuRectT.sizeDelta = new Vector2( (((buttonWidth + distanceBetweenButtons) * buttonPerLine) - distanceBetweenButtons),
@@ -212,7 +176,5 @@ public class Menu : FSystem {
 												(-1)*(int)(i/buttonPerLine)*buttonHeight - (buttonHeight/2f) - (int)(i/buttonPerLine)*distanceBetweenLines - offsetTopBot,
 												0f);
 		}
-
 	}
-
 }

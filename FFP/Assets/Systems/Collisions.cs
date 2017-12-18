@@ -18,18 +18,15 @@ public class Collisions : FSystem {
 	private Family shipInCollision 	= FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
 	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
 
-	private bool isCollisionsInit = false;
-
 	// ==== LIFECYCLE ====
+	public Collisions(){
+		SystemsManager.AddFSystem (this);
+	}
 
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isCollisionsInit) {
-			SystemsManager.AddFSystem (this);
-			isCollisionsInit = true;
-		}
 	}
 
 	protected override void onProcess(int familiesUpdateCount) {
@@ -41,6 +38,15 @@ public class Collisions : FSystem {
 	// TODO bug once on scene reload
 	protected void resolveCollision(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+
+		// /!\ these 2 if can't happen at the same time (exclusive conditions) because the finish in always inside terrain /!\
+
+		if (shipFamily.First ().GetComponent<Position> ().pos.x > 1.0f || shipFamily.First ().GetComponent<Position> ().pos.y > 1.0f
+			|| shipFamily.First ().GetComponent<Position> ().pos.x < 0.0f || shipFamily.First ().GetComponent<Position> ().pos.y < 0.0f) {
+			if (gl.state != GameLogic.STATES.LOST) {
+				gl.OnLost ();
+			}
+		}
 		if (shipInCollision.Count > 0 && gl.state == GameLogic.STATES.PLAYING) {
 			GameObject ship = shipInCollision.First ();
 			InCollision3D col = ship.GetComponent<InCollision3D> ();
@@ -50,11 +56,6 @@ public class Collisions : FSystem {
 					gl.OnWon ();
 				}
 			}
-		} else if (shipFamily.First ().GetComponent<Position> ().pos.x > 1 || shipFamily.First ().GetComponent<Position> ().pos.y > 1
-			|| shipFamily.First ().GetComponent<Position> ().pos.x < 0 || shipFamily.First ().GetComponent<Position> ().pos.y < 0) {
-			if (gl.state != GameLogic.STATES.LOST) {
-				gl.OnLost ();
-			}
-		}
+		} 
 	}
 }

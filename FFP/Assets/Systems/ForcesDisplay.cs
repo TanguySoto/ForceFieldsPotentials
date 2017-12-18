@@ -21,20 +21,18 @@ public class ForcesDisplay : FSystem {
 
 	private bool isShowSources 			= true;
 	private bool isShowFields 			= true;
-	private bool isForcesDisplayInit 	= false;
 
 	// ==== LIFECYCLE ====
+
+	public ForcesDisplay(){
+		SystemsManager.AddFSystem (this);
+		init ();
+	}
 	
 	protected override void onPause(int currentFrame) {
 	}
 
 	protected override void onResume(int currentFrame){
-		if (!isForcesDisplayInit) {
-			SystemsManager.AddFSystem (this);
-			init ();
-			isForcesDisplayInit = true;
-		}
-
 		refresh ();
 	}
 		

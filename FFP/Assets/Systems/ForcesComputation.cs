@@ -19,18 +19,16 @@ public class ForcesComputation : FSystem {
 	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
 	private bool isShipMovable = true;
-	private bool isForcesComputationInit = false;
 
 	// ==== LIFECYCLE ====
-	
+	public ForcesComputation(){
+		SystemsManager.AddFSystem (this);
+	}
+
 	protected override void onPause(int currentFrame) {
 	}
 		
 	protected override void onResume(int currentFrame){
-		if (!isForcesComputationInit) {
-			SystemsManager.AddFSystem (this);
-			isForcesComputationInit = true;
-		}
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
@@ -67,6 +65,18 @@ public class ForcesComputation : FSystem {
 
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		ui.UpdateShipInformations (ship);
+
+		// moving projection to correct height
+		Transform projection = ship.transform.GetChild(1);
+		LineRenderer line = projection.gameObject.GetComponent<LineRenderer> ();
+
+		RaycastHit hit = new RaycastHit();
+		// touched something and was not UI
+		if (Physics.Raycast (ship.transform.position, Vector3.down, out hit)) {
+			projection.position = hit.point;
+		}
+		line.SetPosition (1, ship.transform.position);
+		line.SetPosition (0, projection.position);
 
 		/* Apply force using unity and thus allowing smooth collisons
 		Rigidbody r = ship.GetComponent<Rigidbody> ();
