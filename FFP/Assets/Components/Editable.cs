@@ -10,6 +10,5 @@
  */
 
 public class Editable : MonoBehaviour {
-	// If an Entity is composed of this components, the player can edit it
-	// Example : force field sources
+	public bool editable = true;
 }

@@ -62,20 +62,36 @@ public class GameLogic : FSystem {
 		}
 	}
 
-	protected void InitShip(){
+	public void InitShip(){
 		// Get Terrain dims to scale object
 		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
 		Vector3 terrDims = terr.terrainData.size;
 
 		// Get associated dims and position
 		GameObject s = shipFamily.First();
+		s.GetComponent<Movement> ().speed = s.GetComponent<Movement> ().initialSpeed;
 		Position position = s.GetComponent<Position> ();
-		Vector3 p = position.pos;
+		Vector3 p = position.initialPos;
+		position.pos = p;
 		Transform tr = s.GetComponent<Transform> ();
 
-		// Move it to right position
+		// Move it to right position and turn it
 		Vector3 newPos = new Vector3 (p.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, p.y * terrDims.z);
 		tr.position = newPos;
+		Movement m = s.GetComponent<Movement> ();
+		tr.rotation = Quaternion.Euler(90, (360-Mathf.Atan2(m.speed.y,m.speed.x)*Mathf.Rad2Deg+90)%360,0);
+
+		// moving projection to correct height
+		Transform projection = s.transform.GetChild(1);
+		LineRenderer line = projection.gameObject.GetComponent<LineRenderer> ();
+
+		RaycastHit hit = new RaycastHit();
+		// touched something and was not UI
+		if (Physics.Raycast (s.transform.position, Vector3.down, out hit)) {
+			projection.position = hit.point;
+		}
+		line.SetPosition (1, s.transform.position);
+		line.SetPosition (0, projection.position);
 	}
 
 	public void OnPlay(){
@@ -88,18 +104,20 @@ public class GameLogic : FSystem {
 
 		// make ship not editable anymore
 		GameObject ship = shipFamily.First ();
-		if (ship.GetComponent<Editable> () != null) {
-			GameObjectManager.removeComponent<Editable> (ship);
+		if (ship.GetComponent<Editable> ().editable) {
+			ship.GetComponent<Editable> ().editable = false;
 			if (pa.previousGameObject == ship) {
 				ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
 				ui.UpdateShipInformations (ship);
 			}
 		}
+		// save ship attributes in case of retry
+		ship.GetComponent<Movement> ().initialSpeed = ship.GetComponent<Movement> ().speed;
 
 		// make sources not editable anymore
 		foreach (GameObject s in sourcesFamily) {
-			if (s.GetComponent<Editable> () != null) {
-				GameObjectManager.removeComponent<Editable> (s);
+			if (s.GetComponent<Editable>()!=null && s.GetComponent<Editable> ().editable) {
+				s.GetComponent<Editable> ().editable = false;
 				if (pa.previousGameObject == s) {
 					s.GetComponent<Renderer> ().material = pa.selectedMaterial;
 					if (s.GetComponent<Field> ().isUniform) {
@@ -120,14 +138,14 @@ public class GameLogic : FSystem {
 
 	public void OnLost(){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		ui.launchButton.GetComponentInChildren<Text> ().text = "Retry";
+		ui.launchButton.GetComponentInChildren<Text> ().text = "Try again";
 		Debug.Log ("LOST NOOB");
 		state = STATES.LOST;
 	}
 
 	public void OnWon(){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		ui.launchButton.GetComponentInChildren<Text> ().text = "Replay";
+		ui.launchButton.GetComponentInChildren<Text> ().text = "Next level";
 		Debug.Log ("GG WP");
 		state = STATES.WON;
 	}

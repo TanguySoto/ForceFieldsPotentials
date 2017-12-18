@@ -59,7 +59,7 @@ public class UI : FSystem {
 	public Button menuButton;
 
 	// === NextLevelButton
-	public Button nextLevelButton;
+	public Button retryButton;
 
 	// === LaunchButton
 	public Button launchButton;
@@ -132,7 +132,7 @@ public class UI : FSystem {
 	protected override void onProcess(int familiesUpdateCount) {
 		UpdateFPS ();
 		UpdateTimers ();
-		UpdateNextLevelButton ();
+		UpdateNextLevel ();
 	}
 
 	// ==== METHODS ====
@@ -157,10 +157,9 @@ public class UI : FSystem {
 		menuButton = GameObject.Find ("MenuButton").GetComponent<Button> ();
 		menuButton.onClick.AddListener (() => OnMenuButtonClicked ());
 
-		// === Next level button
-		nextLevelButton = GameObject.Find ("NextLevelButton").GetComponent<Button> ();
-		nextLevelButton.onClick.AddListener (() => OnNextLevelButtonClicked ());
-		nextLevelButton.interactable = false;
+		// === Retry button
+		retryButton = GameObject.Find ("RetryButton").GetComponent<Button> ();
+		retryButton.onClick.AddListener (() => OnRetryButtonClicked ());
 
 		// === Launch button
 		launchButton = GameObject.Find ("ButtonLaunch").GetComponent<Button> ();
@@ -307,37 +306,59 @@ public class UI : FSystem {
 
 
 	// === Showing Next level button and updating number of unlocked levels
-	public void UpdateNextLevelButton(){
+	public void UpdateNextLevel(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		GameObject gameInfos = GameObject.Find("GameInformations");
 		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
 
-		// if level is won and not the last one, activate next level button
-		if (gl.state == GameLogic.STATES.WON && levelInfos.noLevel < levelInfos.totalLevels && nextLevelButton.interactable == false) {
+
+		// if level is won and is not the last one
+		if (gl.state == GameLogic.STATES.WON && levelInfos.noLevel < levelInfos.totalLevels) {
+			// if first win, save it
 			if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
 				levelInfos.unlockedLevels++;
-				Debug.Log ("Level "+levelInfos.unlockedLevels+" unlocked!");
+				Debug.Log ("Level " + levelInfos.unlockedLevels + " unlocked!");
 			}
-			nextLevelButton.interactable = true;
-		}
-
-		// if next level is already unlocked, and next level button not activated 
-		if (levelInfos.noLevel < levelInfos.unlockedLevels && nextLevelButton.interactable == false) {
-			nextLevelButton.interactable = true;
 		}
 	}
 
 
 	// === Next level button
-	protected void OnNextLevelButtonClicked(){
-		GameObject gameInfos = GameObject.Find("GameInformations");
-		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
-		if (levelInfos.noLevel < levelInfos.totalLevels) {
-			levelInfos.noLevel++;
-			Debug.Log ("Go to level "+levelInfos.noLevel);
-			SystemsManager.ResetFSystems ();
-			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
+	protected void OnRetryButtonClicked(){
+		// Reset game state
+		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem ("PlayerActions");
+		gl.state = GameLogic.STATES.SETUP;
+
+		// reset ship
+		gl.InitShip ();
+		GameObject s = shipFamily.First ();
+		s.GetComponent<Editable> ().editable = true;
+		if (pa.previousGameObject == s) {
+			s.GetComponent<Renderer> ().material = pa.selectedAndEditableMaterial;
+			UpdateShipInformations (s);
 		}
+
+		// reset sources
+		foreach (GameObject src in editableSourcesFamily) {
+			src.GetComponent<Editable> ().editable = true;
+			if (pa.previousGameObject == src) {
+				src.GetComponent<Renderer> ().material = pa.selectedAndEditableMaterial;
+
+				if (src.GetComponent<Field> ().isUniform) {
+					UpdateUniSourcesInformations (src);
+				} else {
+					UpdateSourcesInformations (src);
+				}
+			}
+		}
+
+		// reset ui & terrain
+		travelTime = 0;
+		launchButton.GetComponentInChildren<Text> ().text = "Launch";
+
+		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem ("ForcesDisplay");
+		fd.refresh ();
 	}
 
 
@@ -368,12 +389,15 @@ public class UI : FSystem {
 			launchButton.GetComponentInChildren<Text> ().text = "Pause";
 			break;
 		case GameLogic.STATES.WON:
-			SystemsManager.ResetFSystems ();
-			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
+			if (levelInfos.noLevel < levelInfos.totalLevels) {
+				levelInfos.noLevel++;
+				Debug.Log ("Go to level "+levelInfos.noLevel);
+				SystemsManager.ResetFSystems ();
+				GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
+			}
 			break;
 		case GameLogic.STATES.LOST:
-			SystemsManager.ResetFSystems ();
-			GameObjectManager.loadScene ("level_"+levelInfos.noLevel);
+			OnRetryButtonClicked ();
 			break;
 		default:
 			break;
@@ -389,10 +413,10 @@ public class UI : FSystem {
 		shipX.text = p.pos.x.ToString ("F3") + " m";
 		shipY.text = p.pos.y.ToString ("F3") + " m";
 
-		if (ship.GetComponent<Editable> () == null) {
-			shipSpeedPanel.interactable = false;
-		} else {
+		if (ship.GetComponent<Editable> ().editable) {
 			shipSpeedPanel.interactable = true;
+		} else {
+			shipSpeedPanel.interactable = false;
 		}
 	}
 
@@ -433,7 +457,7 @@ public class UI : FSystem {
 		sourceX.text = p.pos.x.ToString ("F3") + " m";
 		sourceY.text = p.pos.y.ToString ("F3") + " m";
 
-		if (sources.GetComponent<Editable> () == null) {
+		if (sources.GetComponent<Editable> () == null || !sources.GetComponent<Editable> ().editable) {
 			sourcesInformationsPanel.interactable = false;
 		} else {
 			sourcesInformationsPanel.interactable = true;
@@ -493,7 +517,7 @@ public class UI : FSystem {
 		uniSourceX.text = p.pos.x.ToString ("F3") + " m";
 		uniSourceY.text = p.pos.y.ToString ("F3") + " m";
 
-		if (sources.GetComponent<Editable> () == null) {
+		if (sources.GetComponent<Editable> () == null || !sources.GetComponent<Editable> ().editable) {
 			uniSourcesInformationsPanel.interactable = false;
 		} else {
 			uniSourcesInformationsPanel.interactable = true;

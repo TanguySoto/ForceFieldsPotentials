@@ -138,7 +138,7 @@ public class PlayerActions : FSystem {
 			previousGameObject = go;
 
 			// Still editable ?
-			if (go.GetComponent<Editable> () == null) {
+			if (go.GetComponent<Editable> () == null || !go.GetComponent<Editable> ().editable) {
 				go.GetComponent<Renderer> ().material = selectedMaterial;
 			} else {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
@@ -177,7 +177,7 @@ public class PlayerActions : FSystem {
 			previousGameObject = go;
 
 			// Still editable ?
-			if (go.GetComponent<Editable> () == null) {
+			if (!go.GetComponent<Editable> ().editable) {
 				go.GetComponent<Renderer> ().material = selectedMaterial;
 			} else {
 				go.GetComponent<Renderer> ().material = selectedAndEditableMaterial;
