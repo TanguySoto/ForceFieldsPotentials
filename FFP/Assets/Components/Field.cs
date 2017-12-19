@@ -16,6 +16,7 @@ public class Field : MonoBehaviour {
 
 	// === Gaussian parameters
 	public float A = 0.2f;
+	public bool isRepulsive = false;
 
 	// === Plan parameters : z = bx + cy
 	public bool isUniform = false;

@@ -19,5 +19,5 @@ public class Constants : FSystem {
 
 	public static int 	FORCES_ROUNDING 		= 1000;	// give 3 numbers after floating point		
 	public static float FORCES_SCALING 			= 20;
-	public static float SOURCES_SIZE_SCALING 	= 10;
+	public static float SOURCES_SIZE_SCALING 	= 7;
 }

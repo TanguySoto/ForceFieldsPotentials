@@ -33,6 +33,8 @@ public class ForcesComputation : FSystem {
 		
 	protected override void onProcess(int familiesUpdateCount) {
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		if (gl == null) {return;}
+
 		if (isShipMovable && gl.state==GameLogic.STATES.PLAYING) {
 			applyForceToShip ();
 		}
@@ -71,7 +73,7 @@ public class ForcesComputation : FSystem {
 		LineRenderer line = projection.gameObject.GetComponent<LineRenderer> ();
 
 		RaycastHit hit = new RaycastHit();
-		// touched something and was not UI
+		// touched terrain
 		if (Physics.Raycast (ship.transform.position, Vector3.down, out hit)) {
 			projection.position = hit.point;
 		}

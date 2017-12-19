@@ -38,8 +38,9 @@ public class Collisions : FSystem {
 	// TODO bug once on scene reload
 	protected void resolveCollision(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		if (gl == null) {return;}
 
-		// /!\ these 2 if can't happen at the same time (exclusive conditions) because the finish in always inside terrain /!\
+		// /!\ these 2 if can't happen at the same time (exclusive conditions) because collision always happen inside terrain /!\
 
 		if (shipFamily.First ().GetComponent<Position> ().pos.x > 1.0f || shipFamily.First ().GetComponent<Position> ().pos.y > 1.0f
 			|| shipFamily.First ().GetComponent<Position> ().pos.x < 0.0f || shipFamily.First ().GetComponent<Position> ().pos.y < 0.0f) {
@@ -52,8 +53,16 @@ public class Collisions : FSystem {
 			InCollision3D col = ship.GetComponent<InCollision3D> ();
 
 			foreach (GameObject target in col.Targets) {
+				Field f = target.GetComponent<Field> ();
+				// finish
 				if (target.tag == "finish") {
 					gl.OnWon ();
+				}
+				else {
+					// gaussian field source
+					if (f != null && !f.isUniform) {
+						gl.OnLost ();
+					}
 				}
 			}
 		} 

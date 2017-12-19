@@ -108,10 +108,8 @@ public class UI : FSystem {
 	// === Sources add/del panel
 	public CanvasGroup sourceAddDelPanel;
 	private Button addButton;
-	private Button uniAddButton;
 	public Button deleteButton;
 	private Text fieldLeft;
-	private Text uniFieldLeft;
 
 	// === Minimap
 	private Camera miniMapCamera;
@@ -223,15 +221,11 @@ public class UI : FSystem {
 		sourceAddDelPanel = GameObject.Find("AddSourcesPanel").GetComponent<CanvasGroup>();
 		addButton = GameObject.Find ("AddButton").GetComponent<Button> ();
 		addButton.onClick.AddListener (() => OnAddButtonClicked ());
-		uniAddButton = GameObject.Find ("UniAddButton").GetComponent<Button> ();
-		uniAddButton.onClick.AddListener (() => OnUniAddButtonClicked ()); 
 		deleteButton = GameObject.Find ("DeleteButton").GetComponent<Button> ();
 		deleteButton.onClick.AddListener (() => OnDeleteButtonClicked ());
 		deleteButton.interactable = false;
 		fieldLeft = GameObject.Find("SourcesLeft").GetComponent<Text>();
 		fieldLeft.text = ""+GameObject.Find ("AddSourcesPanel").GetComponent<FieldsCounter> ().fieldsLeft;
-		uniFieldLeft = GameObject.Find("UniSourcesLeft").GetComponent<Text>();
-		uniFieldLeft.text = ""+GameObject.Find ("AddSourcesPanel").GetComponent<FieldsCounter> ().uniFieldsLeft;
 
 		// === MiniMap
 		miniMapCamera = GameObject.Find("SecondaryCamera").GetComponent<Camera>();	
@@ -252,6 +246,7 @@ public class UI : FSystem {
 	// === Timer
 	protected void UpdateTimers(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
+		if (gl == null) {return;}
 
 		// update timers
 		if (gl.state != GameLogic.STATES.LOST && gl.state != GameLogic.STATES.WON) {
@@ -310,7 +305,7 @@ public class UI : FSystem {
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		GameObject gameInfos = GameObject.Find("GameInformations");
 		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
-
+		if (gl == null) {return;}	
 
 		// if level is won and is not the last one
 		if (gl.state == GameLogic.STATES.WON && levelInfos.noLevel < levelInfos.totalLevels) {
@@ -356,6 +351,10 @@ public class UI : FSystem {
 		// reset ui & terrain
 		travelTime = 0;
 		launchButton.GetComponentInChildren<Text> ().text = "Launch";
+		FieldsCounter fc = FamilyManager.getFamily (new AllOfComponents (typeof(FieldsCounter))).First ().GetComponent<FieldsCounter> ();
+		if (fc.sources.Length>0) {
+			Show (sourceAddDelPanel);
+		}
 
 		ForcesDisplay fd = (ForcesDisplay)SystemsManager.GetFSystem ("ForcesDisplay");
 		fd.refresh ();
@@ -452,11 +451,23 @@ public class UI : FSystem {
 	public void UpdateSourcesInformations(GameObject sources){
 		Position p = sources.GetComponent<Position> ();
 		Field f = sources.GetComponent<Field> ();
-		sourceStrengthSlider.value = (int)(f.A*100);
+
+		// values
+		int nextValue = (int)(f.A*100);
+		if (f.isRepulsive) {
+			sourceStrengthSlider.maxValue = 100;
+			sourceStrengthSlider.minValue = 0;
+		} else {
+			sourceStrengthSlider.maxValue = 0;
+			sourceStrengthSlider.minValue = -100;
+		}
+		sourceStrengthSlider.value = nextValue;
+			
 		sourceRadiusSlider.value = (int)(f.sigx*100);
 		sourceX.text = p.pos.x.ToString ("F3") + " m";
 		sourceY.text = p.pos.y.ToString ("F3") + " m";
 
+		// editable ?
 		if (sources.GetComponent<Editable> () == null || !sources.GetComponent<Editable> ().editable) {
 			sourcesInformationsPanel.interactable = false;
 		} else {
@@ -510,6 +521,8 @@ public class UI : FSystem {
 	public void UpdateUniSourcesInformations(GameObject sources){
 		Position p = sources.GetComponent<Position> ();
 		Field f = sources.GetComponent<Field> ();
+
+		// values
 		uniSourceDxSlider.value = (int)Mathf.Round(f.b*5000);
 		uniSourceDySlider.value = (int)Mathf.Round(f.c*5000);
 		uniSourceWidthSlider.value = (int)(f.sigx*200);
@@ -517,6 +530,7 @@ public class UI : FSystem {
 		uniSourceX.text = p.pos.x.ToString ("F3") + " m";
 		uniSourceY.text = p.pos.y.ToString ("F3") + " m";
 
+		// Editable ?
 		if (sources.GetComponent<Editable> () == null || !sources.GetComponent<Editable> ().editable) {
 			uniSourcesInformationsPanel.interactable = false;
 		} else {
@@ -616,31 +630,16 @@ public class UI : FSystem {
 
 		// field left
 		if (fc.fieldsLeft > 0  && gl.state==GameLogic.STATES.SETUP) {
-			GameObject s = GameObject.Instantiate (fc.source);
-			s.name = s.name + fc.cpt;
-			fc.cpt++;
+			GameObject s = fc.sources [fc.fieldsLeft - 1];
+			s.SetActive (true);
 			GameObjectManager.bind (s);
 
 			// update UI
 			fc.fieldsLeft--;
 			fieldLeft.text = "" + fc.fieldsLeft;
-		}
-	}
-
-	protected void OnUniAddButtonClicked(){
-		FieldsCounter fc = FamilyManager.getFamily (new AllOfComponents (typeof(FieldsCounter))).First ().GetComponent<FieldsCounter> ();
-		GameLogic gl = (GameLogic)SystemsManager.GetFSystem ("GameLogic");
-
-		// uni field left
-		if (fc.uniFieldsLeft > 0  && gl.state==GameLogic.STATES.SETUP) {
-			GameObject s = GameObject.Instantiate (fc.uniSource);
-			s.name = s.name + fc.cpt;
-			fc.cpt++;
-			GameObjectManager.bind (s);
-
-			// update UI
-			fc.uniFieldsLeft--;
-			uniFieldLeft.text = "" + fc.uniFieldsLeft;
+			if (fc.fieldsLeft == 0) {
+				addButton.interactable = false;
+			}
 		}
 	}
 
@@ -651,20 +650,19 @@ public class UI : FSystem {
 		// a field is indeed selected
 		if (pa.previousGameObject!=null && editableSourcesFamily.contains(pa.previousGameObject.GetInstanceID())) {
 			// update UI
-			if (pa.previousGameObject.GetComponent<Field> ().isUniform) {
-				fc.uniFieldsLeft++;
-				uniFieldLeft.text = "" + fc.uniFieldsLeft;
-			} else {
-				fc.fieldsLeft++;
-				fieldLeft.text = "" + fc.fieldsLeft;
-			}
+			fc.fieldsLeft++;
+			fieldLeft.text = "" + fc.fieldsLeft;
 
 			// we delete it
+			fc.sources[fc.fieldsLeft-1]=pa.previousGameObject;
 			GameObjectManager.unbind (pa.previousGameObject);
-			GameObject.Destroy (pa.previousGameObject);
+			pa.previousGameObject.GetComponent<Renderer> ().material = pa.previousMaterial;
+			pa.previousGameObject.SetActive (false);
 			pa.previousGameObject = null;
 			pa.previousMaterial = null;
 			Hide (sourcesInformationsPanel);
+			Hide (uniSourcesInformationsPanel);
+			addButton.interactable = true;
 		}
 	}
 

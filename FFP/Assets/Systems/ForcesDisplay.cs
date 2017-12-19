@@ -147,8 +147,13 @@ public class ForcesDisplay : FSystem {
 
 				// CHANGE THE RULES BELOW TO SET THE WEIGHTS OF EACH TEXTURE ON WHATEVER RULES YOU WANT
 				splatWeights [0] = 0.5f;
-				splatWeights [1] = Mathf.Pow(1 - (height-minHeight) / (maxHeight - minHeight),2);
-				splatWeights [2] = Mathf.Pow((height - minHeight) / (maxHeight - minHeight),2);
+				if (maxHeight - minHeight != 0) {
+					splatWeights [1] = Mathf.Pow (1 - (height - minHeight) / (maxHeight - minHeight), 2);
+					splatWeights [2] = Mathf.Pow ((height - minHeight) / (maxHeight - minHeight), 2);
+				} else {
+					splatWeights [1] = 0.25f;
+					splatWeights [2] = 0.25f;
+				}
 
 				// Sum of all textures weights must add to 1, so calculate normalization factor from sum of weights
 				float z = splatWeights.Sum();
@@ -194,9 +199,9 @@ public class ForcesDisplay : FSystem {
 				dims.width = field.sigx * scale * 2;
 				dims.length = field.sigy * scale * 	2;
 			} else {
-				dims.height = 1;
 				dims.width = field.sigx * scale;
 				dims.length = field.sigy * scale;
+				dims.height = field.sigy * scale;
 			}
 
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
