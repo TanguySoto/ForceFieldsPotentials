@@ -37,6 +37,7 @@ public class ForcesDisplay : FSystem {
 	}
 		
 	protected override void onProcess(int familiesUpdateCount) {
+		rotateSources ();
 	}
 		
 	// ==== METHODS ====
@@ -202,9 +203,19 @@ public class ForcesDisplay : FSystem {
 				dims.width = field.sigx * scale;
 				dims.length = field.sigy * scale;
 				dims.height = field.sigy * scale;
+				tr.Rotate (0, Time.deltaTime, 0);
 			}
 
 			tr.localScale = new Vector3(dims.width, dims.height, dims.length);
+		}
+	}
+
+	protected void rotateSources(){
+		foreach (GameObject s in sourcesFamily) {
+			Transform tr = s.GetComponent<Transform> ();
+			if (!s.GetComponent<Field> ().isUniform) {
+				tr.Rotate (0, 15*Time.deltaTime, 0);
+			}
 		}
 	}
 
