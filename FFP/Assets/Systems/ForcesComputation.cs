@@ -15,7 +15,7 @@ public class ForcesComputation : FSystem {
 	// ==== VARIABLES ====
 
 	private Family pPlanFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
-	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass)));
 	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
 
 	private bool isShipMovable = true;
@@ -35,12 +35,25 @@ public class ForcesComputation : FSystem {
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		if (gl == null) {return;}
 
-		if (isShipMovable && gl.state==GameLogic.STATES.PLAYING) {
+		if (isShipMovable && gl.state == GameLogic.STATES.PLAYING) {
 			applyForceToShip ();
+		} else {
+			keepShipInPlace ();
 		}
 	}
 
 	// ==== METHODS ====
+	protected void keepShipInPlace(){
+		// Get Terrain heightMap and place it
+		Terrain terr = pPlanFamily.First ().GetComponent<Terrain>();
+		Vector3 terrDims = terr.terrainData.size;
+
+		// Get the ship and its position, speed, acc and mass
+		GameObject ship = shipFamily.First ();
+		Position shipPosition = ship.GetComponent<Position> ();
+		Transform tr = ship.GetComponent<Transform>();
+		tr.position = new Vector3 (shipPosition.pos.x * terrDims.x, Constants.BASE_SOURCE_HEIGHT * terrDims.y, shipPosition.pos.y * terrDims.z);
+	}
 
 	protected void applyForceToShip(){
 		// Get Terrain heightMap and place it

@@ -196,8 +196,8 @@ public class ForcesDisplay : FSystem {
 			float scale = Constants.SOURCES_SIZE_SCALING;
 			if (field.isUniform) {
 				dims.height = 0.33f;
-				dims.width = field.sigx * scale * 2;
-				dims.length = field.sigy * scale * 	2;
+				dims.width = field.sigx*20;
+				dims.length = field.sigy*20;
 			} else {
 				dims.width = field.sigx * scale;
 				dims.length = field.sigy * scale;

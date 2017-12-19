@@ -31,7 +31,7 @@ public class PlayerActions : FSystem {
 
 	// === Object Selection
 	private Family sourcesFamily 	= FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position)));
-	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass)));
 	private bool canPlayerSelect 	= true;
 	public Material selectedMaterial;
 	public Material selectedAndEditableMaterial;
@@ -276,7 +276,7 @@ public class PlayerActions : FSystem {
 			rotation = Quaternion.Lerp(currentRotation, desiredRotation, Time.deltaTime * zoomDampening);
 			transform.rotation = rotation;
 		}
-		// otherwise if middle mouse is selected, we pan by way of transforming the target in screenspace
+		/* otherwise if middle mouse is selected, we pan by way of transforming the target in screenspace
 		else if (Input.GetMouseButton(2))
 		{
 			//grab the rotation of the camera so we can move in a pseudo local XY space
@@ -284,6 +284,7 @@ public class PlayerActions : FSystem {
 			target.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
 			target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
 		}
+		*/
 
 		// we can also pan with Z-S/Q-D keys
 		if (Input.GetKey ("z")) {
@@ -306,7 +307,7 @@ public class PlayerActions : FSystem {
 		////////Orbit Position
 
 		// affect the desired Zoom distance if we roll the scrollwheel
-		desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
+		//desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
 		//clamp the zoom min/max
 		desiredDistance = Mathf.Clamp(desiredDistance, minDistance, maxDistance);
 		// For smoothing of the zoom, lerp distance

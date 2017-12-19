@@ -16,7 +16,7 @@ public class UI : FSystem {
 
 	// ==== VARIABLES ====
 
-	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass)));
 	private Family editableSourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position), typeof(Editable)));
 	private Family PPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
 

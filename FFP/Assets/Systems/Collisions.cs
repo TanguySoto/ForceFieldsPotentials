@@ -16,7 +16,7 @@ public class Collisions : FSystem {
 	// ==== VARIABLES ====
 
 	private Family shipInCollision 	= FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
-	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass),typeof(Charge)));
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass))); 
 
 	// ==== LIFECYCLE ====
 	public Collisions(){
@@ -57,6 +57,8 @@ public class Collisions : FSystem {
 				// finish
 				if (target.tag == "finish") {
 					gl.OnWon ();
+				} else if (target.tag == "obstacle") {
+					gl.OnLost ();
 				}
 				else {
 					// gaussian field source
