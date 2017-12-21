@@ -17,15 +17,14 @@ using System.Collections.Generic;
  * Tanguy SOTO
  */
 
-public class Credits : FSystem {
+public class BackToMenu : FSystem {
 
 	public Button menuButton;
 
-	public Credits(){
+	public BackToMenu(){
 		InitCredits ();
 	}
-
-
+		
 	protected void InitCredits(){
 		menuButton = GameObject.Find ("MenuButton").GetComponent<Button> ();
 		menuButton.onClick.AddListener (() => OnMenuButtonClicked ());

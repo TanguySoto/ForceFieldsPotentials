@@ -141,6 +141,7 @@ public class GameLogic : FSystem {
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		ui.launchButton.GetComponentInChildren<Text> ().text = "Try again";
 		Debug.Log ("LOST NOOB");
+
 		// == Text after winning or losing
 		Text wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
 		wonOrLostText.text = "YOU LOST";

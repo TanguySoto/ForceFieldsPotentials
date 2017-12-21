@@ -56,6 +56,7 @@ public class Menu : FSystem {
 		// TO RESET PLAYER PREF
 		//PlayerPrefs.DeleteAll ();
 
+		// Loading saved game informations
 		gameInfos = GameObject.Find ("GameInformations");
 
 		if (gameInfos == null) {
@@ -92,7 +93,6 @@ public class Menu : FSystem {
 		playButton.onClick.AddListener (() => OnCreditsButtonClicked ());
 
 	}
-
 
 
 	protected void OnPlayButtonClicked (){

@@ -124,7 +124,7 @@ public class Levels : FSystem {
 			// Color and deactivate locked level buttons
 			if (i < levelInfos.unlockedLevels) {
 				ColorBlock cb = newButton.GetComponent<Button> ().colors;
-				cb.normalColor = Color.green;
+				cb.normalColor = new Color (0.5f,1,0.75f);
 				newButton.GetComponent<Button> ().colors = cb;
 			}
 			else{
