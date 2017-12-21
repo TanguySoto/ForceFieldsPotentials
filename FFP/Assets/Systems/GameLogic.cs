@@ -10,6 +10,7 @@ using FYFY;
  * Guillaume LORTHIOIR
  * Tanguy SOTO
  */
+using System.Collections;
 
 public class GameLogic : FSystem {
 
@@ -140,13 +141,34 @@ public class GameLogic : FSystem {
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		ui.launchButton.GetComponentInChildren<Text> ().text = "Try again";
 		Debug.Log ("LOST NOOB");
+		// == Text after winning or losing
+		Text wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
+		wonOrLostText.text = "YOU LOST";
+		wonOrLostText.enabled = true;
 		state = STATES.LOST;
 	}
+
 
 	public void OnWon(){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
 		ui.launchButton.GetComponentInChildren<Text> ().text = "Next level";
 		Debug.Log ("GG WP");
+
+		Text wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
+		wonOrLostText.text = "YOU WON";
+
+		// Doesn't update anything, update occurs in UI
+		GameObject gameInfos = GameObject.Find("GameInformations");
+		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
+		if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
+			wonOrLostText.text += "\nLevel " + (levelInfos.unlockedLevels+1) + " unlocked!";
+		}
+		if (levelInfos.unlockedLevels == levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
+			wonOrLostText.text += "\nCongrats, you finished the game";
+		}
+		wonOrLostText.enabled = true;
 		state = STATES.WON;
 	}
+
+
 }

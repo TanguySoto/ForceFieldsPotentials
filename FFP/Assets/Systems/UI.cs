@@ -53,7 +53,7 @@ public class UI : FSystem {
 	private int frameRange = 60;
 	private int[] fpsBuffer;
 	private int fpsBufferIndex = 0;
-	private Text FPSLabel, highestFPSLabel, lowestFPSLabel;
+	private Text FPSLabel, highestFPSLabel, lowestFPSLabel, wonOrLostText;
 
 	// === MenuButton
 	public Button menuButton;
@@ -229,6 +229,12 @@ public class UI : FSystem {
 
 		// === MiniMap
 		miniMapCamera = GameObject.Find("SecondaryCamera").GetComponent<Camera>();	
+
+
+		// Hide the text
+		wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
+		wonOrLostText.enabled = false;
+
 	}
 
 	// === Hide Toggle
@@ -300,6 +306,7 @@ public class UI : FSystem {
 	}
 
 
+	// TODO: Delete this and put it in GameLogic?
 	// === Showing Next level button and updating number of unlocked levels
 	public void UpdateNextLevel(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
@@ -312,6 +319,7 @@ public class UI : FSystem {
 			// if first win, save it
 			if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
 				levelInfos.unlockedLevels++;
+				PlayerPrefs.SetInt("highestUnlockedLevel", levelInfos.unlockedLevels);
 				Debug.Log ("Level " + levelInfos.unlockedLevels + " unlocked!");
 			}
 		}
@@ -320,6 +328,9 @@ public class UI : FSystem {
 
 	// === Next level button
 	protected void OnRetryButtonClicked(){
+		// Hide won or lost message
+		wonOrLostText.enabled = false;
+
 		// Reset game state
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		PlayerActions pa = (PlayerActions)SystemsManager.GetFSystem ("PlayerActions");

@@ -53,6 +53,9 @@ public class Menu : FSystem {
 
 
 	protected void InitMenu(){
+		// TO RESET PLAYER PREF
+		//PlayerPrefs.DeleteAll ();
+
 		gameInfos = GameObject.Find ("GameInformations");
 
 		if (gameInfos == null) {
@@ -60,6 +63,12 @@ public class Menu : FSystem {
 			gameInfos = GameObject.Instantiate (goCreateGameInfos.GetComponent<CreateGameInfos> ().gameInfosPrefab);
 			gameInfos.name = "GameInformations";
 			Object.DontDestroyOnLoad (gameInfos);
+		}
+
+
+		if (PlayerPrefs.HasKey ("highestUnlockedLevel")) {
+			GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
+			levelInfos.unlockedLevels = PlayerPrefs.GetInt ("highestUnlockedLevel");
 		}
 
 

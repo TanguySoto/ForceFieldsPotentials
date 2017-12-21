@@ -138,7 +138,7 @@ public class Levels : FSystem {
 
 	public void OnLevelButtonClicked (int index){
 		Debug.Log ("Go to level "+index);
-		GameObject gameInfos = GameObject.Find ("GameInformations");
+		gameInfos = GameObject.Find ("GameInformations");
 		gameInfos.GetComponent<GameInformations> ().noLevel = index;
 		GameObjectManager.loadScene("level_"+index);
 	}
