@@ -13,8 +13,6 @@ using System.Collections;
 
 public class GameInformations : MonoBehaviour {
 
-	public bool init = false;
-
 	public int noLevel 			= 1; // numero level - level in which the player is in
 	public int unlockedLevels 	= 1; // number of unlocked levels
 	public int totalLevels 		= 7; // number of levels

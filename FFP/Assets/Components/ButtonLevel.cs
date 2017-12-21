@@ -10,7 +10,7 @@ using System.Collections;
  * Tanguy SOTO
  */
 
-public class ButtonMenu : MonoBehaviour {
+public class ButtonLevel : MonoBehaviour {
 
 	public GameObject buttonLevelPrefab;
 
