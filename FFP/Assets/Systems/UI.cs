@@ -680,7 +680,7 @@ public class UI : FSystem {
 	public void UpdateEndPanel(float score, float bestScore){
 		// LOST
 		if (score == -1) {
-			wonOrLostText.text = "YOU LOST!";
+			wonOrLostText.text = "FAILED!";
 			scoreText.text = "0";
 			star1.SetActive (false);
 			star2.SetActive (false);
@@ -688,7 +688,7 @@ public class UI : FSystem {
 		}
 		// WON
 		else {
-			wonOrLostText.text = "YOU WON!";
+			wonOrLostText.text = "LEVEL CLEARED!";
 			scoreText.text = ""+(int)(score*10000);
 
 			if (score == bestScore) {
