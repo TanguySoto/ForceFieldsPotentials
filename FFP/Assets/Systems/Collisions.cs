@@ -35,7 +35,6 @@ public class Collisions : FSystem {
 
 	// ==== METHODS ====
 
-	// TODO bug once on scene reload
 	protected void resolveCollision(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		if (gl == null) {return;}
@@ -54,11 +53,14 @@ public class Collisions : FSystem {
 
 			foreach (GameObject target in col.Targets) {
 				Field f = target.GetComponent<Field> ();
+				Debug.Log (target.name);
 				// finish
 				if (target.tag == "finish") {
 					gl.OnWon ();
 				} else if (target.tag == "obstacle") {
 					gl.OnLost ();
+				} else if (target.tag == "bonus") {
+					// TODO
 				}
 				else {
 					// gaussian field source
@@ -66,6 +68,7 @@ public class Collisions : FSystem {
 						gl.OnLost ();
 					}
 				}
+
 			}
 		} 
 	}

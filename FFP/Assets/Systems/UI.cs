@@ -27,8 +27,8 @@ public class UI : FSystem {
 	private Toggle hideInterface;
 
 	// === Timers
-	private float totalTime = 0;
-	private float travelTime = 0;
+	public float totalTime = 0;
+	public float travelTime = 0;
 
 	private Text totalTimeText;
 	private Text travelTimeText;
@@ -53,7 +53,7 @@ public class UI : FSystem {
 	private int frameRange = 60;
 	private int[] fpsBuffer;
 	private int fpsBufferIndex = 0;
-	private Text FPSLabel, highestFPSLabel, lowestFPSLabel, wonOrLostText;
+	private Text FPSLabel, highestFPSLabel, lowestFPSLabel;
 
 	// === MenuButton
 	public Button menuButton;
@@ -111,6 +111,16 @@ public class UI : FSystem {
 	public Button deleteButton;
 	private Text fieldLeft;
 
+	// ===  End panel
+	public CanvasGroup endPanel;
+	private CanvasGroup newBestScorePanel;
+	private Text wonOrLostText;
+	private Text scoreText;
+	private Text bestScoreText;
+	private GameObject star1;
+	private GameObject star2;
+	private GameObject star3;
+
 	// === Minimap
 	private Camera miniMapCamera;
 
@@ -130,7 +140,6 @@ public class UI : FSystem {
 	protected override void onProcess(int familiesUpdateCount) {
 		UpdateFPS ();
 		UpdateTimers ();
-		UpdateNextLevel ();
 	}
 
 	// ==== METHODS ====
@@ -227,14 +236,20 @@ public class UI : FSystem {
 		fieldLeft = GameObject.Find("SourcesLeft").GetComponent<Text>();
 		fieldLeft.text = ""+GameObject.Find ("AddSourcesPanel").GetComponent<FieldsCounter> ().fieldsLeft;
 
+		// === End Panel
+		endPanel =  GameObject.Find("EndPanel").GetComponent<CanvasGroup>();
+		Hide (endPanel);
+		newBestScorePanel =  GameObject.Find("NewBestScorePanel").GetComponent<CanvasGroup>();
+		Hide (newBestScorePanel);
+		wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
+		scoreText = GameObject.Find("ScoreText").GetComponent<Text>();
+		bestScoreText = GameObject.Find("BestScoreText").GetComponent<Text>();
+		star1 = GameObject.Find("star1");
+		star2 = GameObject.Find("star2");
+		star3 = GameObject.Find("star3");
+
 		// === MiniMap
 		miniMapCamera = GameObject.Find("SecondaryCamera").GetComponent<Camera>();	
-
-
-		// Hide the text
-		wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
-		wonOrLostText.enabled = false;
-
 	}
 
 	// === Hide Toggle
@@ -305,31 +320,11 @@ public class UI : FSystem {
 		lowestFPSLabel.text = stringsFrom00To99[Mathf.Clamp(lowestFPS, 0, 99)];
 	}
 
-
-	// TODO: Delete this and put it in GameLogic?
-	// === Showing Next level button and updating number of unlocked levels
-	public void UpdateNextLevel(){
-		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
-		GameObject gameInfos = GameObject.Find("GameInformations");
-		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
-		if (gl == null) {return;}	
-
-		// if level is won and is not the last one
-		if (gl.state == GameLogic.STATES.WON && levelInfos.noLevel < levelInfos.totalLevels) {
-			// if first win, save it
-			if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
-				levelInfos.unlockedLevels++;
-				PlayerPrefs.SetInt("highestUnlockedLevel", levelInfos.unlockedLevels);
-				Debug.Log ("Level " + levelInfos.unlockedLevels + " unlocked!");
-			}
-		}
-	}
-
-
 	// === Next level button
 	protected void OnRetryButtonClicked(){
-		// Hide won or lost message
-		wonOrLostText.enabled = false;
+		// Hide EndPanel
+		Hide(endPanel);
+		Hide (newBestScorePanel);
 
 		// Reset game state
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
@@ -380,6 +375,10 @@ public class UI : FSystem {
 
 
 	// === Launch button
+	public void UpdateLaunchButton(string text){
+		launchButton.GetComponentInChildren<Text> ().text = text;
+	}
+
 	protected void OnLaunchButtonClicked(){
 		GameLogic gl = (GameLogic)SystemsManager.GetFSystem("GameLogic");
 		GameObject gameInfos = GameObject.Find("GameInformations");
@@ -388,15 +387,15 @@ public class UI : FSystem {
 		switch (gl.state) {
 		case GameLogic.STATES.SETUP:
 			gl.OnPlay ();
-			launchButton.GetComponentInChildren<Text> ().text = "Pause";
+			UpdateLaunchButton("Pause");
 			break;
 		case GameLogic.STATES.PLAYING:
 			gl.OnPause ();
-			launchButton.GetComponentInChildren<Text> ().text = "Play";
+			UpdateLaunchButton("Play");
 			break;
 		case GameLogic.STATES.PAUSED:
 			gl.OnPlay ();
-			launchButton.GetComponentInChildren<Text> ().text = "Pause";
+			UpdateLaunchButton("Pause");
 			break;
 		case GameLogic.STATES.WON:
 			if (levelInfos.noLevel < levelInfos.totalLevels) {
@@ -675,6 +674,53 @@ public class UI : FSystem {
 			Hide (uniSourcesInformationsPanel);
 			addButton.interactable = true;
 		}
+	}
+
+	// === End screen
+	public void UpdateEndPanel(float score, float bestScore){
+		// LOST
+		if (score == -1) {
+			wonOrLostText.text = "YOU LOST!";
+			scoreText.text = "0";
+			star1.SetActive (false);
+			star2.SetActive (false);
+			star3.SetActive (false);
+		}
+		// WON
+		else {
+			wonOrLostText.text = "YOU WON!";
+			scoreText.text = ""+(int)(score*10000);
+
+			if (score == bestScore) {
+				Show (newBestScorePanel);
+			}
+
+			// stars
+			if (score > 0.24f) {
+				star1.SetActive (true);
+
+				if (score > 0.49f) {
+					star2.SetActive (true);
+
+					if (score > 0.74f) {
+						star3.SetActive (true);
+					} else {
+						star3.SetActive (false);
+					}
+				} else {
+					star2.SetActive (false);
+					star3.SetActive (false);
+				}
+			}
+			else {
+				star1.SetActive (false);
+				star2.SetActive (false);
+				star3.SetActive (false);
+			}
+		}
+		bestScoreText.text = "Best : " + +(int)(bestScore*10000);
+			
+		Show (endPanel);
 	}
 
 	// === General

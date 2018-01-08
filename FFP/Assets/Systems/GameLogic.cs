@@ -139,37 +139,64 @@ public class GameLogic : FSystem {
 
 	public void OnLost(){
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		ui.launchButton.GetComponentInChildren<Text> ().text = "Try again";
-		Debug.Log ("LOST NOOB");
+		ui.UpdateLaunchButton("Try again");
 
-		// == Text after winning or losing
-		Text wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
-		wonOrLostText.text = "YOU LOST";
-		wonOrLostText.enabled = true;
+		GameInformations levelsInfos = GameObject.Find("GameInformations").GetComponent<GameInformations> ();
+		string key = "level_" + levelsInfos.noLevel + "_bestScore";
+
+		ui.UpdateEndPanel (-1,PlayerPrefs.GetFloat (key));
 		state = STATES.LOST;
 	}
-
-
+		
 	public void OnWon(){
+
+		// Update unlocked levels
+		GameInformations levelsInfos = GameObject.Find("GameInformations").GetComponent<GameInformations> ();
+		if (levelsInfos.unlockedLevels < levelsInfos.totalLevels && levelsInfos.noLevel == levelsInfos.unlockedLevels) {
+			levelsInfos.unlockedLevels++;
+			PlayerPrefs.SetInt("highestUnlockedLevel", levelsInfos.unlockedLevels);
+			Debug.Log ("Level " + levelsInfos.unlockedLevels + " unlocked!");
+		}
+
+		// Update best level score
+		string key = "level_" + levelsInfos.noLevel + "_bestScore";
+		float score = calculateScore();
+		float oldBestScore = 0;
+		if (PlayerPrefs.HasKey (key)) {
+			oldBestScore = PlayerPrefs.GetFloat (key);
+		}
+		if (score > oldBestScore) {
+			PlayerPrefs.SetFloat (key, score);
+		}
+
+
+		// Update UI
 		UI ui = (UI)SystemsManager.GetFSystem("UI");
-		ui.launchButton.GetComponentInChildren<Text> ().text = "Next level";
-		Debug.Log ("GG WP");
+		ui.UpdateLaunchButton("Next level");
+		ui.UpdateEndPanel (score,PlayerPrefs.GetFloat (key));
 
-		Text wonOrLostText = GameObject.Find("WonOrLostText").GetComponent<Text>();
-		wonOrLostText.text = "YOU WON";
-
-		// Doesn't update anything, update occurs in UI
-		GameObject gameInfos = GameObject.Find("GameInformations");
-		GameInformations levelInfos = gameInfos.GetComponent<GameInformations> ();
-		if (levelInfos.unlockedLevels < levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
-			wonOrLostText.text += "\nLevel " + (levelInfos.unlockedLevels+1) + " unlocked!";
-		}
-		if (levelInfos.unlockedLevels == levelInfos.totalLevels && levelInfos.noLevel == levelInfos.unlockedLevels) {
-			wonOrLostText.text += "\nCongrats, you finished the game";
-		}
-		wonOrLostText.enabled = true;
 		state = STATES.WON;
 	}
 
+	protected float calculateScore(){
+		UI ui = (UI)SystemsManager.GetFSystem("UI");
+		LevelInformations infos = GameObject.Find ("LevelInformations").GetComponent<LevelInformations> ();
 
+		// Bonus
+		int N_BONUS = infos.NB_BONUS;
+		int collectedBonus = infos.collectedBonus;
+		float bonusScore = (N_BONUS > 0) ? collectedBonus * 1.0f / N_BONUS : -1; 
+
+		// Time
+		float EXPERT_TIME = infos.EXPERT_TIME;
+		float travelTime = ui.travelTime;
+		float timeScore = EXPERT_TIME/(travelTime > 0 ? travelTime : 0.01f);
+
+		float score = (timeScore + bonusScore) / 2.0f;
+		if (bonusScore == -1) {
+			score = timeScore;
+		}
+
+		return score;
+	}
 }
