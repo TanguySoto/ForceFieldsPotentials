@@ -18,7 +18,9 @@ public class UI : FSystem {
 
 	private Family shipFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass)));
 	private Family editableSourcesFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Field), typeof(Dimensions), typeof(Position), typeof(Editable)));
+	private Family bonusFamily = FamilyManager.getFamily (new AllOfComponents (typeof(Bonus)));
 	private Family PPlanFamily = FamilyManager.getFamily(new AllOfComponents(typeof(Terrain)));
+	private Family levelInfoFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(LevelInformations)));
 
 	// === Main panel
 	CanvasGroup mainCanvasGroup;
@@ -353,6 +355,19 @@ public class UI : FSystem {
 				}
 			}
 		}
+
+		// reset Bonus
+		LevelInformations info = levelInfoFamily.First().GetComponent<LevelInformations>();
+		info.collectedBonus = 0;
+		foreach (GameObject b in bonusFamily) {
+			Bonus bonus = b.GetComponent<Bonus>();
+			if (bonus.isCollected) {
+				bonus.isCollected = false;
+				GameObjectManager.addComponent<SphereCollider> (b, new {radius = 0.6f});	
+				GameObjectManager.setGameObjectState (b, true);
+			}
+		}
+
 
 		// reset ui & terrain
 		travelTime = 0;

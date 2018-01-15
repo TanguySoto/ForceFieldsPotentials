@@ -16,7 +16,8 @@ public class Collisions : FSystem {
 	// ==== VARIABLES ====
 
 	private Family shipInCollision 	= FamilyManager.getFamily(new AllOfComponents(typeof(InCollision3D)));
-	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass))); 
+	private Family shipFamily 		= FamilyManager.getFamily(new AllOfComponents(typeof(Dimensions),typeof(Movement),typeof(Position),typeof(Mass)));
+	private Family levelInfoFamily	= FamilyManager.getFamily(new AllOfComponents(typeof(LevelInformations)));
 
 	// ==== LIFECYCLE ====
 	public Collisions(){
@@ -48,21 +49,29 @@ public class Collisions : FSystem {
 			}
 		}
 		if (shipInCollision.Count > 0 && gl.state == GameLogic.STATES.PLAYING) {
-			GameObject ship = shipInCollision.First ();
-			InCollision3D col = ship.GetComponent<InCollision3D> ();
+			InCollision3D col = shipInCollision.First ().GetComponent<InCollision3D> ();
 
 			foreach (GameObject target in col.Targets) {
-				Field f = target.GetComponent<Field> ();
-				Debug.Log (target.name);
 				// finish
 				if (target.tag == "finish") {
 					gl.OnWon ();
 				} else if (target.tag == "obstacle") {
 					gl.OnLost ();
 				} else if (target.tag == "bonus") {
-					// TODO
+					GameObject levelInformations = levelInfoFamily.First ();
+					LevelInformations infos = levelInformations.GetComponent<LevelInformations> ();
+
+					Bonus b = target.GetComponent<Bonus> ();
+					if (!b.isCollected) {
+						infos.collectedBonus++;
+						GameObjectManager.removeComponent<SphereCollider> (target);
+						GameObject.Destroy(target.GetComponent<CollisionSensitive3DTarget>());
+						GameObjectManager.setGameObjectState (target, false);
+						b.isCollected=true;
+					}
 				}
 				else {
+					Field f = target.GetComponent<Field> ();
 					// gaussian field source
 					if (f != null && !f.isUniform) {
 						gl.OnLost ();
