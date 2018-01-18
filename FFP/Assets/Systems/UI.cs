@@ -336,9 +336,15 @@ public class UI : FSystem {
 		// reset ship
 		gl.InitShip ();
 		GameObject s = shipFamily.First ();
-		s.GetComponent<Editable> ().editable = true;
+		if(s.GetComponent<Editable> () != null){
+			s.GetComponent<Editable> ().editable = true;
+		}
 		if (pa.previousGameObject == s) {
-			s.GetComponent<Renderer> ().material = pa.selectedAndEditableMaterial;
+			if (s.GetComponent<Editable> () != null && s.GetComponent<Editable> ().editable) {
+				s.GetComponent<Renderer> ().material = pa.selectedAndEditableMaterial;
+			} else {
+				s.GetComponent<Renderer> ().material = pa.selectedMaterial;
+			}
 			UpdateShipInformations (s);
 		}
 
@@ -437,7 +443,7 @@ public class UI : FSystem {
 		shipX.text = p.pos.x.ToString ("F3") + " m";
 		shipY.text = p.pos.y.ToString ("F3") + " m";
 
-		if (ship.GetComponent<Editable> ().editable) {
+		if (ship.GetComponent<Editable> () != null && ship.GetComponent<Editable> ().editable) {
 			shipSpeedPanel.interactable = true;
 		} else {
 			shipSpeedPanel.interactable = false;

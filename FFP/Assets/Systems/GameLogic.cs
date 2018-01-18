@@ -105,7 +105,7 @@ public class GameLogic : FSystem {
 
 		// make ship not editable anymore
 		GameObject ship = shipFamily.First ();
-		if (ship.GetComponent<Editable> ().editable) {
+		if (ship.GetComponent<Editable> () != null && ship.GetComponent<Editable> ().editable) {
 			ship.GetComponent<Editable> ().editable = false;
 			if (pa.previousGameObject == ship) {
 				ship.GetComponent<Renderer> ().material = pa.selectedMaterial;
