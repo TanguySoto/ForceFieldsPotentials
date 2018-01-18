@@ -26,7 +26,7 @@ public class Menu : FSystem {
 	public Button levelsButton;
 	public Button helpButton;
 	public Button creditsButton;
-
+	public Button tutoButton;
 
 	public GameObject gameInfos;
 
@@ -82,6 +82,9 @@ public class Menu : FSystem {
 		playButton = GameObject.Find ("LevelsButton").GetComponent<Button> ();
 		playButton.onClick.AddListener (() => OnLevelsButtonClicked ());
 
+		// === Levels button
+		tutoButton = GameObject.Find ("TutoButton").GetComponent<Button> ();
+		tutoButton.onClick.AddListener (() => OnTutoButtonClicked ());
 
 		// === Help button
 		playButton = GameObject.Find ("HelpButton").GetComponent<Button> ();
@@ -112,6 +115,9 @@ public class Menu : FSystem {
 		GameObjectManager.loadScene("CreditsScene");
 	}
 
+	protected void OnTutoButtonClicked(){
+		GameObjectManager.loadScene ("LevelTuto");
+	}
 	public void UpdateMenu(){
 
 	}

@@ -323,7 +323,7 @@ public class UI : FSystem {
 	}
 
 	// === Next level button
-	protected void OnRetryButtonClicked(){
+	public void OnRetryButtonClicked(){
 		// Hide EndPanel
 		Hide(endPanel);
 		Hide (newBestScorePanel);
