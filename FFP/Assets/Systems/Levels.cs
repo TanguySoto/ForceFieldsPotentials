@@ -22,6 +22,8 @@ public class Levels : FSystem {
 	private Family menuFamily = FamilyManager.getFamily (new AllOfComponents(typeof(ButtonLevel)));
 	//private Family gameInfosFamily = FamilyManager.getFamily (new AllOfComponents (typeof(GameInformations))); // Should be only one - and in DontDestroyOnLoad
 
+	// bouton to get back to the menu
+	public Button backToMenu;
 
 	private GameObject[] buttonLevels;
 
@@ -71,6 +73,9 @@ public class Levels : FSystem {
 		gameInfos = GameObject.Find("GameInformations");
 		GameObject menuFrame = GameObject.Find ("Menu"); // to get the menu stretched size
 
+		// === Play button
+		backToMenu = GameObject.Find ("MenuButton").GetComponent<Button> ();
+		backToMenu.onClick.AddListener (() => OnBackToMenuButtonClicked ());
 
 		ButtonLevel buttonLevel = menu.GetComponent<ButtonLevel> ();
 		RectTransform menuRectT = menu.GetComponent<RectTransform> ();
@@ -171,5 +176,11 @@ public class Levels : FSystem {
 												(-1)*(int)(i/buttonPerLine)*buttonHeight - (buttonHeight/2f) - (int)(i/buttonPerLine)*distanceBetweenLines - offsetTopBot,
 												0f);
 		}
+	}
+
+
+
+	public void OnBackToMenuButtonClicked(){
+		GameObjectManager.loadScene("MenuScene");
 	}
 }
