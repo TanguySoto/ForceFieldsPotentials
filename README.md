@@ -1,11 +1,11 @@
 # Force Fields Potentials
 3D Physics Serious Game
 
-![screenshot](screenshots/main.jpg)
+![screenshot](screenshots/main.png)
 
 ## Summary
 
-[Serious Game](https://en.wikipedia.org/wiki/Serious_game) developed with Unity to help you 
+[Serious Game](https://en.wikipedia.org/wiki/Serious_game) developed with Unity and a custom ECS library from the [LIP6 Serious Game team](http://seriousgames.lip6.fr/) to help you 
 * understand the impact of initial speed on the trajectory of a moving object subject to forces
 * anticipate the action of forces on the trajectory of a moving object by visualizing the energy potentials of objects and force fields (equation `f = -grad(EP)`).
 
